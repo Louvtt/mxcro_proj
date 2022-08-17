@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <functional>
 #include "contextRender.h"
 #include "types.h"
 
@@ -61,13 +62,13 @@ namespace ContextEvent {
     constexpr code CLOSE         = 7;
     constexpr code LAST          = CLOSE;
 
-    typedef void (*RESIZEFN)       (u32 _sizex, u32 _sizey, void* _params);
-    typedef void (*MOUSEMOVEFN)    (u32 _x, u32 _y, void* _params);
-    typedef void (*SCROLLFN)       (i32 _delta, void* _params);
-    typedef void (*BUTTONPRESSFN)  (u32 _button, u32 _mods, void* _params);
+    typedef void (*RESIZEFN       )(u32 _sizex, u32 _sizey, void* _params);
+    typedef void (*MOUSEMOVEFN    )(u32 _x, u32 _y, void* _params);
+    typedef void (*SCROLLFN       )(i32 _delta, void* _params);
+    typedef void (*BUTTONPRESSFN  )(u32 _button, u32 _mods, void* _params);
     typedef void (*BUTTONRELEASEFN)(u32 _button, u32 _mods, void* _params);
-    typedef void (*KEYPRESSFN)     (u32 _key, u32 _scancode, u32 _mods, void* _params);
-    typedef void (*KEYRELEASEFN)   (u32 _key, u32 _scancode, u32 _mods, void* _params);
+    typedef void (*KEYPRESSFN     )(u32 _key, u32 _scancode, u32 _mods, void* _params);
+    typedef void (*KEYRELEASEFN   )(u32 _key, u32 _scancode, u32 _mods, void* _params);
 } // namespace Event
 void invoke(int _targetID, mx::ContextEvent::code _code, u32 _arg0, u32 _arg1, u32 _arg2);
 
@@ -124,7 +125,7 @@ public:
     PlatformHandle getPlatformHandle() const;
     ContextDesc getDesc() const;
 
-    mx::ContextRender* get2DRenderer() const;
+    ContextRender* get2DRenderer() const;
 
     // Base Render methods
     void clear(float r, float g, float b, float a = 1.F);
@@ -134,7 +135,7 @@ private:
     bool close = false;
 
     PlatformHandle handle;
-    ContextRender* render = nullptr;
+    std::unique_ptr<ContextRender> render = nullptr;
 
     friend void createGLContext(int targetID);
     void setupBase(); 

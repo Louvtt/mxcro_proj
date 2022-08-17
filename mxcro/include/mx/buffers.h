@@ -35,8 +35,8 @@ enum class ShapeAttribute
 class Buffer;
 struct ShapeDrawDataDesc
 {
-    Buffer* vertexBuffer = nullptr;
-    Buffer* indexBuffer  = nullptr;
+    std::shared_ptr<Buffer> vertexBuffer = nullptr;
+    std::shared_ptr<Buffer> indexBuffer  = nullptr;
     std::vector<ShapeAttribute> attributes{};
 };
 

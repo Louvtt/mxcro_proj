@@ -14,7 +14,7 @@ const char* vCode = ""
 "uniform mat4 uProj;\n"
 "uniform mat4 uView;\n"
 "void main() {\n"
-"   gl_Position = uProj * vec4(aPos.x, aPos.y, 0, 1);\n"
+"   gl_Position = uProj * uView * vec4(aPos.x, aPos.y, 0, 1);\n"
 "   color = Color;\n"
 "}";
 const char* fCode = ""
@@ -42,13 +42,15 @@ mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
     }
 
     drawData = new mx::ShapeDrawData({
-        new mx::Buffer({
+        std::make_shared<mx::Buffer>(
+        mx::BufferDesc{
             mx::BufferType::DynamicVertex,
             desc.maxBatchCapacity * 4,
             sizeof(Vertex),
             nullptr
         }),
-        new mx::Buffer({
+        std::make_shared<mx::Buffer>(
+        mx::BufferDesc{
             mx::BufferType::Index,
             desc.maxBatchCapacity * 6,
             sizeof(u32),
@@ -140,3 +142,10 @@ void mx::ContextRender::draw()
     data.vertexBuffer->reset();
     vertices.clear();
 }
+
+constexpr float inv_255 = 1.f / 255.f;
+mx::Color::Color(float _r, float _g, float _b, float _a)
+: r(_r), g(_g), b(_b), a(_a) {}
+mx::Color::Color(int _r, int _g, int _b, float _a)
+: a(_a), r((float)_r * inv_255), g((float)_g * inv_255), b((float)_b * inv_255)
+{}

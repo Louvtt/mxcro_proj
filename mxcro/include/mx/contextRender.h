@@ -19,7 +19,10 @@ struct ContextRenderDesc
 
 struct Color { 
     float r, g, b;
-    float a = 1.f;    
+    float a;
+
+    Color(float r, float g, float b, float a=1.f);
+    Color(int r, int g, int b, float a = 1.f);
 };
 
 class ContextRender

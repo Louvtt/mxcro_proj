@@ -1,6 +1,7 @@
 #ifndef _MX_MATH_H_
 #define _MX_MATH_H_
 
+#include <array>
 
 namespace mx
 {
@@ -46,7 +47,7 @@ public:
     // PERSP
     static mat4 persp(float fov, float aspectRatio, float far, float near);
 
-    float data[16];
+    std::array<float, 16> data{};
 };
 
 

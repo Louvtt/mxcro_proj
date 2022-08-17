@@ -107,7 +107,7 @@ mx::ContextDesc mx::Context::getDesc() const
 
 mx::ContextRender* mx::Context::get2DRenderer() const
 {
-    return render;
+    return render.get();
 }
 
 
@@ -120,7 +120,7 @@ void mx::Context::registerOnResize(mx::ContextEvent::RESIZEFN _callback, void* _
         eventCallbacks.insert({mx::ContextEvent::RESIZE, std::vector<EventDescriptor>()});
 
     eventCallbacks.at(mx::ContextEvent::RESIZE).push_back(mx::Context::EventDescriptor{
-        (void*)_callback,
+        _callback,
         _params
     });
 }
@@ -219,8 +219,8 @@ void mx::Context::setupBase()
     glDebugMessageCallback(glDebugCallback, NULL);
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
-    glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glViewport(0, 0, desc.sizex, desc.sizey);
     if((int)desc.flags & (int)mx::ContextFlags::Support3D != 0) {
@@ -234,7 +234,8 @@ void mx::Context::setupBase()
         glViewport(0, 0, _sizex, _sizey);
     }, &this->desc);
 
-    render = new ContextRender({
+    render = std::make_unique<mx::ContextRender>(
+    mx::ContextRenderDesc{
         4096,
         this
     });
