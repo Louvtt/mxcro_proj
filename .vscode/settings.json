@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "*.dialog": "json",
+        ".env": "yaml",
+        "xiosbase": "cpp",
+        "vector": "cpp",
+        "xhash": "cpp",
+        "atomic": "cpp",
+        "ios": "cpp",
+        "list": "cpp",
+        "system_error": "cpp",
+        "xstring": "cpp",
+        "unordered_map": "cpp",
+        "deque": "cpp",
+        "string": "cpp"
+    }
+}
