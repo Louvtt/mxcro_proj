@@ -2,8 +2,13 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <limits.h>
 constexpr float DEG2RAD = M_PI / 180.f;
 
+mx::vec2 mx::vec2::operator-() const
+{
+    return mx::vec2{-x, -y};
+}
 mx::vec2 mx::vec2::operator+(const mx::vec2& other) const
 {
     return mx::vec2{x + other.x, y + other.y};
@@ -74,6 +79,10 @@ bool mx::vec2::operator==(const mx::vec2& other) const
 float mx::vec2::length() const
 {
     return sqrt(x*x + y*y);
+}
+float mx::vec2::sqrLength() const
+{
+    return x*x + y*y;
 }
 mx::vec2 mx::vec2::normalized() const
 {
@@ -146,21 +155,31 @@ mx::mat4 mx::mat4::persp(float _fov, float _aspect, float _far, float _near)
 // calculus
 
 
-template <>
 float mx::lerp(float start, float end, float t)
 {
     return t * end + (1 - t) * start;
 }
-template <>
 mx::vec2 mx::lerp(mx::vec2 start, mx::vec2 end, float t)
 {
     return end * t + start * (1 - t);
 }
 
-template <typename T>
-constexpr T clamp(T value, T min, T max)
+float mx::clamp(float value, float min, float max)
 {
-    if constexpr(value < min) return min;
-    if constexpr(value > max) return max;
+    if (value < min) return min;
+    if (value > max) return max;
     return value;
+}
+
+mx::Random::Random() {
+    gen = std::mt19937(device());
+    f32Distribution = std::uniform_real_distribution<float>(0.f, 1.f);
+}
+
+float mx::Random::operator()() {
+    return f32Distribution(gen);
+}
+
+float mx::Random::range(float _min, float _max) {
+    return f32Distribution(gen) * (_max - _min) + _min;
 }

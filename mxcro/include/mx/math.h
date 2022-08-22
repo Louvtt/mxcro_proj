@@ -2,6 +2,7 @@
 #define _MX_MATH_H_
 
 #include <array>
+#include <random>
 
 namespace mx
 {
@@ -12,6 +13,7 @@ struct vec2
 
     // operators
     
+    vec2 operator-() const;
     vec2 operator+(const vec2& other) const;
     vec2 operator-(const vec2& other) const;
     vec2 operator*(const vec2& other) const;
@@ -33,6 +35,7 @@ struct vec2
     // calculus
 
     float length() const;
+    float sqrLength() const;
     vec2 normalized() const;
     float dot(const vec2& other) const;
 };
@@ -54,15 +57,22 @@ public:
 // calculus
 
 // linear interpolation between start and end
-template <typename T>
-T lerp(T start, T end, float t);
-template <>
 float lerp(float start, float end, float t);
-template <>
 vec2 lerp(vec2 start, vec2 end, float t);
 
-template <typename T>
-constexpr T clamp(T value, T min, T max);
+float clamp(float value, float min, float max);
+
+class Random {
+public:
+    Random();
+    float operator()() ;
+    float range(float min, float max) ;
+
+private:
+    std::uniform_real_distribution<float> f32Distribution;
+    std::random_device device;
+    std::mt19937 gen;
+};
 
 } // namespace mx
 
