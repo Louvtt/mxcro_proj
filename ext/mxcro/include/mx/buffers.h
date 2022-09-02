@@ -9,10 +9,15 @@ namespace mx
 
 enum class BufferType
 {
-    Vertex        = 0x1,
-    Index         = 0x2,
-    DynamicVertex = 0x5,
-    DynamicIndex  = 0x6
+    Vertex        = 0x1, // VBO
+    Index         = 0x2, // EBO
+    DynamicVertex = 0x5, // VBO
+    DynamicIndex  = 0x6, // EBO
+    /* TODO: implement theses buffer types
+    Framebuffer   = 0x7, // FBO
+    UniformBuffer = 0x9, // UBO
+    ShaderStorage = 0x10  // SSBO
+    */
 };
 
 enum class ShapeAttribute
@@ -35,8 +40,8 @@ enum class ShapeAttribute
 class Buffer;
 struct ShapeDrawDataDesc
 {
-    std::shared_ptr<Buffer> vertexBuffer = nullptr;
-    std::shared_ptr<Buffer> indexBuffer  = nullptr;
+    Buffer* vertexBuffer = nullptr;
+    Buffer* indexBuffer  = nullptr;
     std::vector<ShapeAttribute> attributes{};
 };
 

@@ -1,6 +1,7 @@
 #ifndef _MX_TYPES_H_
 #define _MX_TYPES_H_
 
+#include <memory>
 #include <string>
 
 using u8  = unsigned char;

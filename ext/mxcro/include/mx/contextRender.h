@@ -50,14 +50,23 @@ public:
 
 private:
     ContextRenderDesc desc;
-    Shader* shader;
 
+    Shader* shader;
     struct Vertex {
         mx::vec2 pos;
         mx::Color col; 
     };
     std::vector<Vertex> vertices;
     ShapeDrawData* drawData;
+
+    Shader* circleShader;
+    struct CircleVertex {
+        mx::vec2 pos;
+        mx::vec2 tex;
+        mx::Color col; 
+    };
+    std::vector<CircleVertex> circleVertices;
+    ShapeDrawData* circleDrawData;
 
     Color lastColor = { 1.f, 1.f, 1.f, 1.f };
     int lineWidth = 1;

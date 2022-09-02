@@ -71,7 +71,6 @@ mx::ShapeDrawData::ShapeDrawData(ShapeDrawDataDesc _desc)
     {
         desc.vertexBuffer->bind();
         int stride = desc.vertexBuffer->getDesc().dataSize;
-        LOG("DATASTRIDE: " << stride);
         bindAttr(desc.attributes, stride);
     }
 

@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <time.h>
 #include <limits.h>
 constexpr float DEG2RAD = M_PI / 180.f;
 
@@ -86,7 +87,11 @@ float mx::vec2::sqrLength() const
 }
 mx::vec2 mx::vec2::normalized() const
 {
-    float inv_l = 1.f / sqrt(x*x + y*y);
+    float l     = sqrt(x*x + y*y);
+    // avoid dividing by zero
+    if(l == 0) return mx::vec2{0.f, 0.f};
+
+    float inv_l = 1.f / l;
     return mx::vec2{
         x * inv_l,
         y * inv_l
@@ -173,6 +178,7 @@ float mx::clamp(float value, float min, float max)
 
 mx::Random::Random() {
     gen = std::mt19937(device());
+    gen.seed(time(NULL));
     f32Distribution = std::uniform_real_distribution<float>(0.f, 1.f);
 }
 

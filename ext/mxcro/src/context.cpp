@@ -120,7 +120,7 @@ void mx::Context::registerOnResize(mx::ContextEvent::RESIZEFN _callback, void* _
         eventCallbacks.insert({mx::ContextEvent::RESIZE, std::vector<EventDescriptor>()});
 
     eventCallbacks.at(mx::ContextEvent::RESIZE).push_back(mx::Context::EventDescriptor{
-        _callback,
+        (void*)_callback,
         _params
     });
 }

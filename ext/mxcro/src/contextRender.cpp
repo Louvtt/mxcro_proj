@@ -25,10 +25,35 @@ const char* fCode = ""
 "   frag = color;\n"
 "}";
 
+const char* vCode_circle = ""
+"#version 460 core\n"
+"layout (location = 0) in vec2 aPos;\n"
+"layout (location = 1) in vec2 aTex;\n"
+"layout (location = 2) in vec4 Color;\n"
+"out vec4 color;\n"
+"out vec2 tex;\n"
+"uniform mat4 uProj;\n"
+"uniform mat4 uView;\n"
+"void main() {\n"
+"   gl_Position = uProj * uView * vec4(aPos.x, aPos.y, 0, 1);\n"
+"   tex = aTex;\n"
+"   color = Color;\n"
+"}";
+const char* fCode_circle = ""
+"#version 460 core\n"
+"in vec4 color;\n"
+"in vec2 tex;\n"
+"out vec4 frag;\n"
+"void main() {\n"
+"   frag = color;\n"
+"   if(length(tex - vec2(.5)) > .48) discard;\n"
+"}";
+
 mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
 : desc(_desc)
 {
     shader = new mx::Shader(vCode, fCode);
+    circleShader = new mx::Shader(vCode_circle, fCode_circle);
 
     std::vector<u32> quadIndices{};
     quadIndices.reserve(desc.maxBatchCapacity * 6);
@@ -41,15 +66,16 @@ mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
         quadIndices.push_back(0 + i);
     }
 
+    vertices.reserve(2048);
     drawData = new mx::ShapeDrawData({
-        std::make_shared<mx::Buffer>(
+        new mx::Buffer(
         mx::BufferDesc{
             mx::BufferType::DynamicVertex,
             desc.maxBatchCapacity * 4,
             sizeof(Vertex),
             nullptr
         }),
-        std::make_shared<mx::Buffer>(
+        new mx::Buffer(
         mx::BufferDesc{
             mx::BufferType::Index,
             desc.maxBatchCapacity * 6,
@@ -62,7 +88,31 @@ mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
         }
     });
 
-    proj = mx::mat4::ortho(desc.context->getSizeX(), desc.context->getSizeY());
+    
+    circleVertices.reserve(2048);
+    circleDrawData = new mx::ShapeDrawData({
+        new mx::Buffer(
+        mx::BufferDesc{
+            mx::BufferType::DynamicVertex,
+            desc.maxBatchCapacity * 4,
+            sizeof(CircleVertex),
+            nullptr
+        }),
+        new mx::Buffer(
+        mx::BufferDesc{
+            mx::BufferType::Index,
+            desc.maxBatchCapacity * 6,
+            sizeof(u32),
+            quadIndices.data()
+        }),
+        {
+            mx::ShapeAttribute::Pos2D,
+            mx::ShapeAttribute::TexCoords2D,
+            mx::ShapeAttribute::RGBA
+        }
+    });
+
+    proj = mx::mat4::ortho((f32)desc.context->getSizeX(), (f32)desc.context->getSizeY());
     view = mx::mat4();
 }
 
@@ -113,10 +163,10 @@ void mx::ContextRender::drawPoint(mx::vec2 _pos, float _radius)
 }
 void mx::ContextRender::drawPoint(mx::vec2 _pos, float _radius, mx::Color _color)
 {
-    vertices.push_back({ {_pos.x - _radius, _pos.y}, _color });
-    vertices.push_back({ {_pos.x, _pos.y - _radius}, _color });
-    vertices.push_back({ {_pos.x + _radius, _pos.y}, _color });
-    vertices.push_back({ {_pos.x, _pos.y + _radius}, _color });
+    circleVertices.push_back({ {_pos.x - _radius, _pos.y - _radius}, {1.f, 1.f}, _color });
+    circleVertices.push_back({ {_pos.x + _radius, _pos.y - _radius}, {0.f, 1.f}, _color });
+    circleVertices.push_back({ {_pos.x + _radius, _pos.y + _radius}, {0.f, 0.f}, _color });
+    circleVertices.push_back({ {_pos.x - _radius, _pos.y + _radius}, {1.f, 0.f}, _color });
 }
 
 void mx::ContextRender::translateView(mx::vec2 translation)
@@ -129,10 +179,13 @@ void mx::ContextRender::scaleView(vec2 scale)
 
 void mx::ContextRender::draw()
 {
+    mx::ShapeDrawDataDesc data;
+
+    // first batch
     shader->setMat4("uProj", &proj.data[0]);
     shader->setMat4("uView", &view.data[0]);
 
-    mx::ShapeDrawDataDesc data = drawData->getData();
+    data = drawData->getData();
     data.vertexBuffer->pushData(vertices.data(), vertices.size());
 
     shader->bind();
@@ -141,6 +194,20 @@ void mx::ContextRender::draw()
 
     data.vertexBuffer->reset();
     vertices.clear();
+
+    // second batch
+    circleShader->setMat4("uProj", &proj.data[0]);
+    circleShader->setMat4("uView", &view.data[0]);
+
+    data = circleDrawData->getData();
+    data.vertexBuffer->pushData(circleVertices.data(), circleVertices.size());
+
+    circleShader->bind();
+    circleDrawData->draw();
+    circleShader->unbind();
+
+    data.vertexBuffer->reset();
+    circleVertices.clear();
 }
 
 constexpr float inv_255 = 1.f / 255.f;

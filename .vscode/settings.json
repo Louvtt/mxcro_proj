@@ -38,6 +38,7 @@
         "limits": "cpp",
         "memory": "cpp",
         "new": "cpp",
+        "optional": "cpp",
         "ostream": "cpp",
         "sstream": "cpp",
         "stdexcept": "cpp",
@@ -53,6 +54,22 @@
         "xmemory": "cpp",
         "xstddef": "cpp",
         "xtr1common": "cpp",
-        "xutility": "cpp"
-    }
+        "xutility": "cpp",
+        "*.tcc": "cpp",
+        "chrono": "cpp",
+        "cstdarg": "cpp",
+        "cwctype": "cpp",
+        "algorithm": "cpp",
+        "memory_resource": "cpp",
+        "ratio": "cpp",
+        "string_view": "cpp",
+        "cinttypes": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "map": "cpp"
+    },
+    "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
+        "cppcoreguidelines-avoid-magic-numbers",
+        "clang-diagnostic-error"
+    ]
 }
