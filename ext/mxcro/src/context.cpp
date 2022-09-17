@@ -1,6 +1,6 @@
+#include <glad/gl.h>
 #include "mx/context.h"
 
-#include <glad/gl.h>
 
 #include <iostream>
 #define LOG(msg) std::cout << msg << std::endl;
@@ -228,11 +228,12 @@ void mx::Context::setupBase()
     }
 
     registerOnResize([](u32 _sizex, u32 _sizey, void* params){
-        mx::ContextDesc* target = (mx::ContextDesc*)params;
-        target->sizex = _sizex;
-        target->sizey = _sizey;
+        mx::Context* target = (mx::Context*)params;
+        target->desc.sizex = _sizex;
+        target->desc.sizey = _sizey;
         glViewport(0, 0, _sizex, _sizey);
-    }, &this->desc);
+        target->render->resize(_sizex, _sizey);
+    }, this);
 
     render = std::make_unique<mx::ContextRender>(
     mx::ContextRenderDesc{

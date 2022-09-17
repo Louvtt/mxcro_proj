@@ -46,6 +46,8 @@ public:
     void rotateView(float angle);
     void scaleView(vec2 scale);
 
+    void resize(u32 sx, u32 sy);
+
     void draw();
 
 private:

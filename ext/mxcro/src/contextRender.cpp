@@ -1,7 +1,7 @@
-#include "mx/ContextRender.h"
-
-#include "mx/context.h"
 #include <glad/gl.h>
+
+#include "mx/contextRender.h"
+#include "mx/context.h"
 
 #include <iostream>
 #define LOG(msg) std::cout << msg << std::endl;
@@ -119,6 +119,7 @@ mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
 mx::ContextRender::~ContextRender()
 {
     delete drawData;
+    delete circleDrawData;
     delete shader;
 }
 
@@ -209,6 +210,12 @@ void mx::ContextRender::draw()
     data.vertexBuffer->reset();
     circleVertices.clear();
 }
+
+void mx::ContextRender::resize(u32 _sx, u32 _sy)
+{
+    proj = mx::mat4::ortho((f32)_sx, (f32)_sy);
+}
+
 
 constexpr float inv_255 = 1.f / 255.f;
 mx::Color::Color(float _r, float _g, float _b, float _a)

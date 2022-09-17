@@ -67,12 +67,9 @@ mx::ShapeDrawData::ShapeDrawData(ShapeDrawDataDesc _desc)
     glCreateVertexArrays(1, &ID);
     glBindVertexArray(ID);
 
-    if(desc.vertexBuffer)
-    {
-        desc.vertexBuffer->bind();
-        int stride = desc.vertexBuffer->getDesc().dataSize;
-        bindAttr(desc.attributes, stride);
-    }
+    desc.vertexBuffer->bind();
+    int stride = desc.vertexBuffer->getDesc().dataSize;
+    bindAttr(desc.attributes, stride);
 
     if(desc.indexBuffer)
         desc.indexBuffer->bind();

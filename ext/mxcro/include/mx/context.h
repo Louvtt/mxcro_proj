@@ -117,6 +117,7 @@ public:
         #elif defined(__unix__)
             GLXContext glxc;
             Display* display;
+            ::Window win;
             int screen;
             // events
             Atom wmDeleteMessage;
