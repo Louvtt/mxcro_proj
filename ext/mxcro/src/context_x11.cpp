@@ -189,21 +189,22 @@ constexpr static int translateXButtonCode(int button)
     return MX_KEY_UNKNOWN;
 }
 
-mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
+mx::Context::Context(const mx::ContextDesc& _desc)
+: desc(_desc)
 {
     // open x server
-    display = XOpenDisplay(NULL);
-    if(display == NULL) {
+    handle.display = XOpenDisplay(NULL);
+    if(handle.display == NULL) {
         ERR("X11: Cannot open display");
         return;
     }
     // get the screen number
-    screen = DefaultScreen(display);
+    handle.screen = DefaultScreen(handle.display);
 
     // get white and black pixel
     u32 black, white;
-    black = BlackPixel(display, screen);
-    white = WhitePixel(display, screen);
+    black = BlackPixel(handle.display, handle.screen);
+    white = WhitePixel(handle.display, handle.screen);
 
     // setup visual
     #ifdef GLX_ARB_create_context
@@ -222,10 +223,10 @@ mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
 		None
     };
 
-    int fbcount;
-    GLXFBConfig* fbc = glXChooseFBConfig(display, screen, glxAttribs, &fbcount);
+    int fbcount = 0;
+    GLXFBConfig* fbc = glXChooseFBConfig(handle.display, handle.screen, glxAttribs, &fbcount);
     LOG("GLX: Found " << fbcount << " compatible framebuffers.");
-    XVisualInfo* visual = glXGetVisualFromFBConfig(display, fbc[0]);
+    XVisualInfo* visual = glXGetVisualFromFBConfig(handle.display, fbc[0]);
 
     // load createcontextattribARB
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB = NULL;
@@ -233,15 +234,15 @@ mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
     if(glXCreateContextAttribsARB != NULL)
     {
         int glxContextAttributes[] = {
-            GLX_CONTEXT_MAJOR_VERSION_ARB, hints[(int)WindowHint::GLVERSION_MAJOR], // major version (3..)
-            GLX_CONTEXT_MINOR_VERSION_ARB, hints[(int)WindowHint::GLVERSION_MINOR], // minor version (..2)
+            GLX_CONTEXT_MAJOR_VERSION_ARB, desc.hints[(int)ContextHint::GLVERSION_MAJOR], // major version (3..)
+            GLX_CONTEXT_MINOR_VERSION_ARB, desc.hints[(int)ContextHint::GLVERSION_MINOR], // minor version (..2)
             GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,           // Context profile (Core or compat)
             None // END
         };
-        if(hints[(int)WindowHint::GL_COMPATIBILITY_CORE])
+        if(desc.hints[(int)ContextHint::GL_COMPATIBILITY_CORE])
             glxContextAttributes[5] = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
 
-        glxc = glXCreateContextAttribsARB(display, fbc[0], 0, true, glxContextAttributes);
+        handle.glxc = glXCreateContextAttribsARB(handle.display, fbc[0], 0, true, glxContextAttributes);
 
     }
     #else 
@@ -257,8 +258,8 @@ mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
 	    GLX_SAMPLES,        0,
 	    None
     };
-    XVisualInfo* visual = glXChooseVisual(display, screen, glxAttribs);
-    glxc = glXCreateContext(display, visual, NULL, GL_TRUE);
+    XVisualInfo* visual = glXChooseVisual(handle.display, handle.screen, glxAttribs);
+    handle.glxc = glXCreateContext(handle.display, visual, NULL, GL_TRUE);
     #endif
 
     // set window attributes
@@ -266,14 +267,14 @@ mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
     winAttribs.event_mask       = ExposureMask | KeyPressMask | KeyReleaseMask;
     winAttribs.background_pixel = black;
     winAttribs.border_pixel     = white;
-    winAttribs.colormap         = XCreateColormap(display, DefaultRootWindow(display), visual->visual, AllocNone);
+    winAttribs.colormap         = XCreateColormap(handle.display, DefaultRootWindow(handle.display), visual->visual, AllocNone);
     winAttribs.override_redirect = true;
     // create simple x window
-    win = XCreateWindow(
-        display, DefaultRootWindow(display),
-        0, 0,         // pos
-        sizex, sizey, // size
-        0,            // border
+    handle.win = XCreateWindow(
+        handle.display, DefaultRootWindow(handle.display),
+        0, 0,                   // pos
+        desc.sizex, desc.sizey, // size
+        0,                      // border
         visual->depth,
         InputOutput,
         visual->visual,
@@ -282,10 +283,10 @@ mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
     );
 
     // set propreties (title, minimised title etc...)
-    XSetStandardProperties(display, win, name, name, None, NULL, 0, NULL);
+    XSetStandardProperties(handle.display, handle.win, desc.name.c_str(), desc.name.c_str(), None, NULL, 0, NULL);
 
     // set authorised inputs (keyboard)
-    XSelectInput(display, win, 
+    XSelectInput(handle.display, handle.win, 
         ExposureMask|
         KeyPressMask|KeyReleaseMask|
         PointerMotionMask|ButtonPressMask|ButtonReleaseMask
@@ -293,14 +294,14 @@ mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
 
     // test gl
     GLint majorGLX, minorGLX = 0;
-    glXQueryVersion(display, &majorGLX, &minorGLX);
+    glXQueryVersion(handle.display, &majorGLX, &minorGLX);
     LOG("GLX_VERSION:" << majorGLX << "." << minorGLX);
 
     // create context
-    glXMakeCurrent(display, win, glxc);
+    glXMakeCurrent(handle.display, handle.win, handle.glxc);
 
     // enable v-sync
-    XSync(display, true);
+    XSync(handle.display, true);
 
     LOG("GLVERSION:   " << glGetString(GL_VERSION));
     // print("GL_VENDOR:   ", glGetString(GL_VENDOR));
@@ -308,8 +309,8 @@ mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
     // print("GL_LANG:     ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     // show window
-    XClearWindow(display, win);
-    XMapRaised(display, win);
+    XClearWindow(handle.display, handle.win);
+    XMapRaised(handle.display, handle.win);
 
     // cleanup
     XFree(visual);
@@ -318,32 +319,27 @@ mx::Context::Context(const char* name, u32 sizex, u32 sizey, ContextFlags flags)
     // Event subscribing
 
     // close event
-    wmDeleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(display, win, &wmDeleteMessage, 1);
-
+    handle.wmDeleteMessage = XInternAtom(handle.display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(handle.display, handle.win, &handle.wmDeleteMessage, 1);
 
     setupBase();
 }
 
 mx::Context::~Context()
 {
-    glXDestroyContext(display, glxc);
-    XDestroyWindow(display, win);
-    XCloseDisplay(display);
-    screen = 0;
+    glXDestroyContext(handle.display, handle.glxc);
+    XDestroyWindow(handle.display, handle.win);
+    XCloseDisplay(handle.display);
+    handle.screen = 0;
 }
 
-bool mx::Context::shouldClose() const
-{
-    return close;
-}
 void mx::Context::makeCurrent()
 {
-    glXMakeCurrent(display, win, glxc);
+    glXMakeCurrent(handle.display, handle.win, handle.glxc);
 }
 void mx::Context::swapBuffers()
 {
-    glXSwapBuffers(display, win);
+    glXSwapBuffers(handle.display, handle.win);
 }
 void mx::Context::pollEvents()
 {
@@ -352,10 +348,10 @@ void mx::Context::pollEvents()
     char text[256]; // key press buffer
 
     // if there is pending events
-    while(XPending(display) > 0)
+    while(XPending(handle.display) > 0)
     {
         // Get next event
-        XNextEvent(display, &e);
+        XNextEvent(handle.display, &e);
 
         switch(e.type)
         {
@@ -388,12 +384,12 @@ void mx::Context::pollEvents()
             // window
             case Expose: // first creation ?
             case ResizeRequest: // resize
-                ContextAttributes wattr;
-                XGetWindowAttributes(display, win, &wattr);
+                XWindowAttributes wattr;
+                XGetWindowAttributes(handle.display, handle.win, &wattr);
                 invokeEvent(mx::ContextEvent::RESIZE, wattr.width, wattr.height, 0L);
                 break;
             case ClientMessage:
-                if(e.xclient.data.l[0] == wmDeleteMessage) { // close
+                if(e.xclient.data.l[0] == handle.wmDeleteMessage) { // close
                     invokeEvent(mx::ContextEvent::CLOSE, 0L, 0L, 0L);
                     close = true;
                 }
