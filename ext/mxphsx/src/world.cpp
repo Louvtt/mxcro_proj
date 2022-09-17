@@ -27,7 +27,10 @@ void mx::World::step(float _delta)
         // update each body in O(n)
         for(const auto& body : bodies) {
             // avoid
-            if(body->mode == mx::RigidbodyMode::Static) continue;
+            if(body->mode == mx::RigidbodyMode::Static) {
+                body->collided = false;
+                continue;
+            }
 
             body->vel += body->acc * step * body->mass;
             body->pos += body->vel * step;

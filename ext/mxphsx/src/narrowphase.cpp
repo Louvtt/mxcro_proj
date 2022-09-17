@@ -162,7 +162,7 @@ void mx::Narrowphase::impulseResolution(Manifold _m)
 
     ///////////////////////
     // Friction
-    // rv  = _m.second->vel - _m.first->vel;
+    // rv  = (_m.second->vel - _m.first->vel).normalized();
     // mx::vec2 tangent = (rv - dir * rv.dot(dir)).normalized();
     // float jt = -tangent.dot(rv);
     // jt /= _m.first->inv_mass + _m.second->inv_mass;

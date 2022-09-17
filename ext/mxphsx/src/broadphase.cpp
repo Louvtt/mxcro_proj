@@ -11,8 +11,8 @@ mx::Broadphase::Broadphase(mx::World* _world)
 bool mx::Broadphase::AABBvsAABB(mx::Rect _first, mx::Rect _second)
 {
     // assuming the box are centered on their positions
-    mx::vec2 extentA = _first.size  * .5f;
-    mx::vec2 extentB = _second.size * .5f;
+    mx::vec2 extentA = _first.size;
+    mx::vec2 extentB = _second.size;
     
     // maxA < minB || minB > maxB
     // SAT X
@@ -35,6 +35,11 @@ void mx::Broadphase::step(float _delta)
         
         for(int j = i+1; j < bodies.size(); ++j) {
             Rigidbody* second = bodies[j];
+
+            // if both static doesn't check collisions
+            if(first->mode  == mx::RigidbodyMode::Static
+            && second->mode == mx::RigidbodyMode::Static) continue;
+            
             // same collision layer
             if(first->mask & second->mask != 0) {
                 mx::Rect secondAABB = second->getAABB();
