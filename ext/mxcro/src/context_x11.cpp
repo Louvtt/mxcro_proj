@@ -327,6 +327,7 @@ mx::Context::Context(const mx::ContextDesc& _desc)
 
 mx::Context::~Context()
 {
+    render.reset();
     glXDestroyContext(handle.display, handle.glxc);
     XDestroyWindow(handle.display, handle.win);
     XCloseDisplay(handle.display);

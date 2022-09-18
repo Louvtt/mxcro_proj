@@ -3,6 +3,7 @@
 #include <glad/gl.h>
 
 #include <iostream>
+#define LOG(msg) std::cout << msg << std::endl;
 #define ERR(msg) std::cerr << msg << std::endl;
 
 #include <string>
@@ -119,7 +120,7 @@ mx::Shader::Shader(const std::string& vCode, const std::string& fCode)
     // free the shaders that was attached
     glDeleteShader(vID);
     glDeleteShader(fID);
-
+    LOG("Generated shader program : ID = " << ID);
 }
 
 mx::Shader::~Shader()
@@ -171,4 +172,9 @@ void mx::Shader::bind()
 void mx::Shader::unbind()
 {
     glUseProgram(0);
+}
+
+u32 mx::Shader::getProgramID() const
+{
+    return ID;
 }

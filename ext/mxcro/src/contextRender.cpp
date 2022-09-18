@@ -11,8 +11,10 @@ const char* vCode = ""
 "layout (location = 0) in vec2 aPos;\n"
 "layout (location = 1) in vec4 Color;\n"
 "out vec4 color;\n"
-"uniform mat4 uProj;\n"
-"uniform mat4 uView;\n"
+"layout (std140) uniform camera {"
+"   mat4 uProj;\n"
+"   mat4 uView;\n"
+"};"
 "void main() {\n"
 "   gl_Position = uProj * uView * vec4(aPos.x, aPos.y, 0, 1);\n"
 "   color = Color;\n"
@@ -32,8 +34,10 @@ const char* vCode_circle = ""
 "layout (location = 2) in vec4 Color;\n"
 "out vec4 color;\n"
 "out vec2 tex;\n"
-"uniform mat4 uProj;\n"
-"uniform mat4 uView;\n"
+"layout (std140) uniform camera {"
+"   mat4 uProj;\n"
+"   mat4 uView;\n"
+"};"
 "void main() {\n"
 "   gl_Position = uProj * uView * vec4(aPos.x, aPos.y, 0, 1);\n"
 "   tex = aTex;\n"
@@ -50,12 +54,13 @@ const char* fCode_circle = ""
 "}";
 
 mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
-: desc(_desc)
+: desc(_desc),
+shader(new mx::Shader(vCode, fCode)),
+circleShader(new mx::Shader(vCode_circle, fCode_circle)),
+cameraUbo({ "camera", { mx::AttributeType::Mat4, mx::AttributeType::Mat4 }}),
+drawData(nullptr), circleDrawData(nullptr)
 {
-    shader = new mx::Shader(vCode, fCode);
-    circleShader = new mx::Shader(vCode_circle, fCode_circle);
-
-    std::vector<u32> quadIndices{};
+    std::vector<u32> quadIndices = {};
     quadIndices.reserve(desc.maxBatchCapacity * 6);
     for(int i = 0; i < desc.maxBatchCapacity * 4; i+=4) {
         quadIndices.push_back(0 + i); // tri 1
@@ -83,8 +88,8 @@ mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
             quadIndices.data()
         }),
         {
-            mx::ShapeAttribute::Pos2D,
-            mx::ShapeAttribute::RGBA
+            mx::AttributeType::Pos2D,
+            mx::AttributeType::RGBA
         }
     });
 
@@ -106,14 +111,15 @@ mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
             quadIndices.data()
         }),
         {
-            mx::ShapeAttribute::Pos2D,
-            mx::ShapeAttribute::TexCoords2D,
-            mx::ShapeAttribute::RGBA
+            mx::AttributeType::Pos2D,
+            mx::AttributeType::TexCoords2D,
+            mx::AttributeType::RGBA
         }
     });
 
-    proj = mx::mat4::ortho((f32)desc.context->getSizeX(), (f32)desc.context->getSizeY());
-    view = mx::mat4();
+    cam.proj = mx::mat4::ortho((f32)desc.context->getSizeX(), (f32)desc.context->getSizeY());
+    cam.view = mx::mat4();
+    cameraUbo.setAttributesValues((void*)&cam);
 }
 
 mx::ContextRender::~ContextRender()
@@ -121,6 +127,7 @@ mx::ContextRender::~ContextRender()
     delete drawData;
     delete circleDrawData;
     delete shader;
+    delete circleShader;
 }
 
 void mx::ContextRender::setActiveColor(mx::Color _color)
@@ -183,8 +190,7 @@ void mx::ContextRender::draw()
     mx::ShapeDrawDataDesc data;
 
     // first batch
-    shader->setMat4("uProj", &proj.data[0]);
-    shader->setMat4("uView", &view.data[0]);
+    cameraUbo.bind(shader);
 
     data = drawData->getData();
     data.vertexBuffer->pushData(vertices.data(), vertices.size());
@@ -197,8 +203,7 @@ void mx::ContextRender::draw()
     vertices.clear();
 
     // second batch
-    circleShader->setMat4("uProj", &proj.data[0]);
-    circleShader->setMat4("uView", &view.data[0]);
+    cameraUbo.bind(circleShader);
 
     data = circleDrawData->getData();
     data.vertexBuffer->pushData(circleVertices.data(), circleVertices.size());
@@ -213,7 +218,8 @@ void mx::ContextRender::draw()
 
 void mx::ContextRender::resize(u32 _sx, u32 _sy)
 {
-    proj = mx::mat4::ortho((f32)_sx, (f32)_sy);
+    cam.proj = mx::mat4::ortho((f32)_sx, (f32)_sy);
+    cameraUbo.setAttributesValues((void*)&cam);
 }
 
 

@@ -19,12 +19,12 @@ int bufferTypeToGLenum(mx::BufferType _type)
 };
 
 
-static void bindAttr(std::vector<mx::ShapeAttribute> _attributes, int stride)
+static void bindAttr(std::vector<mx::AttributeType> _attributes, u32 stride)
 {
     size_t offset = 0;
     u32 idx       = 0;
 
-    using VA = mx::ShapeAttribute;
+    using VA = mx::AttributeType;
     for(const auto& attr : _attributes)
     {
         glEnableVertexAttribArray(idx);
@@ -33,25 +33,25 @@ static void bindAttr(std::vector<mx::ShapeAttribute> _attributes, int stride)
             // INT
             case VA::Int:
                 glVertexAttribPointer(idx, 1, GL_INT, GL_FALSE, stride, (void*)(offset));
-                offset += 1 * sizeof(int);
+                offset += mx::getAttributeTypeSize(attr);
                 break;
 
             // FLOATS
             case VA::Float:
                 glVertexAttribPointer(idx, 1, GL_FLOAT, GL_FALSE, stride, (void*)(offset));
-                offset += 1 * sizeof(float);
+                offset += mx::getAttributeTypeSize(attr);
                 break;
             case VA::Float2:
                 glVertexAttribPointer(idx, 2, GL_FLOAT, GL_FALSE, stride, (void*)(offset));
-                offset += 2 * sizeof(float);
+                offset += mx::getAttributeTypeSize(attr);
                 break;
             case VA::Float3:
                 glVertexAttribPointer(idx, 3, GL_FLOAT, GL_FALSE, stride, (void*)(offset));
-                offset += 3 * sizeof(float);
+                offset += mx::getAttributeTypeSize(attr);
                 break;
             case VA::Float4:
                 glVertexAttribPointer(idx, 4, GL_FLOAT, GL_FALSE, stride, (void*)(offset));
-                offset += 4 * sizeof(float);
+                offset += mx::getAttributeTypeSize(attr);
                 break;
             default:
                 break;
@@ -68,7 +68,7 @@ mx::ShapeDrawData::ShapeDrawData(ShapeDrawDataDesc _desc)
     glBindVertexArray(ID);
 
     desc.vertexBuffer->bind();
-    int stride = desc.vertexBuffer->getDesc().dataSize;
+    u32 stride = desc.vertexBuffer->getDesc().dataSize;
     bindAttr(desc.attributes, stride);
 
     if(desc.indexBuffer)

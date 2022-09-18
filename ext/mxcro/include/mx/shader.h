@@ -3,6 +3,7 @@
 
 #include <string>
 #include "math.h"
+#include "types.h"
 
 namespace mx
 {
@@ -25,10 +26,11 @@ public:
     void bind();
     void unbind();
 
+    u32 getProgramID() const;
 private:
-    unsigned int ID;
+    u32 ID;
 
-    unsigned int getUniformLocation(const std::string& name);
+    u32 getUniformLocation(const std::string& name);
 };
 
 } // namespace mx

@@ -10,6 +10,8 @@ set(HEADER_FILES
     include/mx/shader.h
     include/mx/types.h
     include/mx/contextRender.h
+    include/mx/renderAttributeTypes.h
+    include/mx/uniformBuffer.h
 )
 
 set(SRC_FILES
@@ -19,6 +21,8 @@ set(SRC_FILES
 
     src/context.cpp
     src/contextRender.cpp
+    src/renderAttributeTypes.cpp
+    src/uniformBuffer.cpp
 )
 
 find_package(X11 REQUIRED)

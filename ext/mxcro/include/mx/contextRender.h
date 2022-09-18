@@ -3,6 +3,7 @@
 
 #include "shader.h"
 #include "buffers.h"
+#include "uniformBuffer.h"
 #include <vector>
 #include "math.h"
 
@@ -73,9 +74,12 @@ private:
     Color lastColor = { 1.f, 1.f, 1.f, 1.f };
     int lineWidth = 1;
 
-    mat4 proj;
-    mat4 view;
 
+    struct CameraData {
+        mat4 proj;
+        mat4 view;
+    } cam;
+    mx::UniformBuffer cameraUbo;
 };
 
 } // namespace mx

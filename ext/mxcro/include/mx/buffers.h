@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "types.h"
+#include "renderAttributeTypes.h"
 
 namespace mx
 {
@@ -47,28 +48,13 @@ private:
 
 ///////////////////////////////////
 
-enum class ShapeAttribute
-{
-    Float,
-    Float2,
-    Float3,
-    Float4,
-    Int,
-    
-    RGBA  = Float4,
-    Pos2D = Float2,
-    Pos3D = Float3, 
-    Tex2D = Int,
-    TexCoords2D = Float2
-};
-
 // Shape
 
 struct ShapeDrawDataDesc
 {
     Buffer* vertexBuffer;
     Buffer* indexBuffer  = nullptr;
-    std::vector<ShapeAttribute> attributes{};
+    std::vector<AttributeType> attributes{};
 };
 
 class ShapeDrawData
