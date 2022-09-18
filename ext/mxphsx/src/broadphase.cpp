@@ -36,7 +36,7 @@ void mx::Broadphase::step(float _delta)
         for(int j = i+1; j < bodies.size(); ++j) {
             Rigidbody* second = bodies[j];
 
-            // if both static doesn't check collisions
+            // if both static don't check collisions
             if(first->mode  == mx::RigidbodyMode::Static
             && second->mode == mx::RigidbodyMode::Static) continue;
             

@@ -28,11 +28,11 @@ static bool computeAABBManifold(mx::Manifold* _m)
         if(y_overlap > 0) {
             // find least depth penetration axis
             if(x_overlap < y_overlap) {
-                _m->normal = (n.x > 0) ? mx::vec2{-1, 0} : mx::vec2{0, 0};
+                _m->normal = (n.x > 0) ? mx::vec2{-1, 0} : mx::vec2{-1, 0};
                 _m->depth  = x_overlap;
             }
             else {
-                _m->normal = (n.y > 0) ? mx::vec2{0, -1} : mx::vec2{0, 0};
+                _m->normal = (n.y > 0) ? mx::vec2{0, -1} : mx::vec2{0, 1};
                 _m->depth  = y_overlap;
             }
 
@@ -47,12 +47,14 @@ static bool computeAABBCircleManifold(mx::Manifold* _m)
 { 
     mx::AABBCollider*   first  = nullptr;
     mx::CircleCollider* second = nullptr;
+    bool invert = false;
     if(_m->first->collider->type == mx::BaseCollider::Type::AABB) {
         first  = dynamic_cast<mx::AABBCollider  *>(_m->first->collider);
         second = dynamic_cast<mx::CircleCollider*>(_m->second->collider);
     } else {
         first  = dynamic_cast<mx::AABBCollider  *>(_m->second->collider);
         second = dynamic_cast<mx::CircleCollider*>(_m->first->collider);
+        invert = true;
     }
 
     mx::vec2 n = _m->second->pos - _m->first->pos;
@@ -87,6 +89,11 @@ static bool computeAABBCircleManifold(mx::Manifold* _m)
 
     _m->normal = (inside) ? -norm.normalized() : norm.normalized();
     _m->depth  = r - d; 
+
+    if(invert) {
+        _m->normal = -_m->normal;
+        _m->depth  = -_m->depth;
+    }
 
     return true; 
 }
@@ -143,7 +150,7 @@ void mx::Narrowphase::impulseResolution(Manifold _m)
     mx::vec2 dir = (_m.second->pos - _m.first->pos).normalized();
     float nvel   = rv.dot(dir);
 
-    if(nvel > 0) return;
+    if(nvel == 0.f) return;
 
     // restitution
     float e = fmin(_m.first->collider->mat.bounciness, _m.second->collider->mat.bounciness);
@@ -154,6 +161,7 @@ void mx::Narrowphase::impulseResolution(Manifold _m)
 
     // apply impulse with mass ratio
     mx::vec2 impulse = _m.normal * j;
+
     float mass_sum = 1.f / (_m.first->mass + _m.second->mass);
     float ratio = _m.first->mass * mass_sum;
     _m.first->vel  += impulse * ratio;
@@ -189,8 +197,8 @@ void mx::Narrowphase::impulseResolution(Manifold _m)
 
 void mx::Narrowphase::positionalCorrection(Manifold _m)
 {
-    const float percent = 0.3;    // usually 20% to 80%  (how much we try to fix)
-    const float slop    = 0.01;   // usually 0.01 to 0.1 (threshold of displacement amount)
+    const float percent = 0.2;    // usually 20% to 80%  (how much we try to fix)
+    const float slop    = 0.1;   // usually 0.01 to 0.1 (threshold of displacement amount)
     mx::vec2 correction = _m.normal * (fmax( _m.depth - slop, 0.0f ) / (_m.first->inv_mass + _m.second->inv_mass) * percent);
     
     if(_m.first->mode  != mx::RigidbodyMode::Static) _m.first->pos  += correction * _m.first->inv_mass;
