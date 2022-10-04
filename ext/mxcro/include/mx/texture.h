@@ -11,7 +11,6 @@ enum class TextureFilter
 {
     Point,
     Linear,
-    Bicubic,
 
     Default = Point
 };
@@ -27,8 +26,8 @@ enum class TextureMode
 
 struct TextureRect
 {
-    int x, y;
-    int w, h;
+    float x, y;
+    float w, h;
 };
 
 struct TextureDesc
@@ -67,8 +66,12 @@ private:
     int m_binding = 0;
 
     u32 m_ID = 0;
-    u32 m_sizeX = 0;
-    u32 m_sizeY = 0;
+    int m_sizeX = 0;
+    int m_sizeY = 0;
+    int m_channels = 0;
+
+    TextureMode   m_mode;
+    TextureFilter m_filter;
 };
 
 class Subtexture
@@ -82,8 +85,8 @@ public:
     static std::vector<Subtexture> SplitTexture(Texture& texture, int cols, int rows);
 
 private:
-    Texture& tex;
-    TextureRect src;
+    Texture& m_tex;
+    TextureRect m_src;
 };
 
 } // namespace mx
