@@ -5,7 +5,9 @@
 
 namespace mx
 {
-struct ShaderStorageBufferDesc {};
+struct ShaderStorageBufferDesc {
+    
+};
 
 class ShaderStorageBuffer {
 public:

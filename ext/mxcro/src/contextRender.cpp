@@ -73,17 +73,17 @@ drawData(nullptr), circleDrawData(nullptr)
 
     vertices.reserve(2048);
     drawData = new mx::ShapeDrawData({
-        new mx::Buffer(
+        new mx::VertexBuffer(
         mx::BufferDesc{
-            mx::BufferType::DynamicVertex,
             desc.maxBatchCapacity * 4,
+            true,
             sizeof(Vertex),
             nullptr
         }),
-        new mx::Buffer(
+        new mx::IndexBuffer(
         mx::BufferDesc{
-            mx::BufferType::Index,
             desc.maxBatchCapacity * 6,
+            false,
             sizeof(u32),
             quadIndices.data()
         }),
@@ -96,17 +96,17 @@ drawData(nullptr), circleDrawData(nullptr)
     
     circleVertices.reserve(2048);
     circleDrawData = new mx::ShapeDrawData({
-        new mx::Buffer(
+        new mx::VertexBuffer(
         mx::BufferDesc{
-            mx::BufferType::DynamicVertex,
             desc.maxBatchCapacity * 4,
+            true,
             sizeof(CircleVertex),
             nullptr
         }),
-        new mx::Buffer(
+        new mx::IndexBuffer(
         mx::BufferDesc{
-            mx::BufferType::Index,
             desc.maxBatchCapacity * 6,
+            false,
             sizeof(u32),
             quadIndices.data()
         }),

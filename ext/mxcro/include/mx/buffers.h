@@ -8,20 +8,12 @@
 namespace mx
 {
 
-enum class BufferType
-{
-    Vertex        = 0x1, // VBO
-    Index         = 0x2, // EBO
-    DynamicVertex = 0x5, // VBO
-    DynamicIndex  = 0x6, // EBO
-};
-
 // SubBuffer
 
 struct BufferDesc
 {
-    BufferType type = BufferType::Vertex;
     u32 count = 0;
+    bool dynamic = false;
     size_t dataSize = 1;
     void* data = nullptr;
 };
@@ -30,30 +22,53 @@ class Buffer
 {
 public:
     Buffer(BufferDesc desc);
-    ~Buffer();
+    virtual ~Buffer();
 
-    void bind();
-    void unbind();
+    virtual void bind() = 0;
+    virtual void unbind() = 0;
 
     void pushData(void* data, u32 count);
     void reset();
 
     BufferDesc getDesc() const;
     u32 getCount() const;
-private:
+
+protected:
     BufferDesc desc;
     u32 currentCount = 0;
-    unsigned int ID = 0;
+    unsigned int m_Id = 0;
 };
 
 ///////////////////////////////////
+// BUFFER TYPES CLASSES
 
+class VertexBuffer
+: public Buffer
+{
+public:
+    VertexBuffer(BufferDesc desc);
+
+    void bind() override;
+    void unbind() override;
+};
+
+class IndexBuffer
+: public Buffer
+{
+public:
+    IndexBuffer(BufferDesc desc);
+
+    void bind() override;
+    void unbind() override;
+};
+
+///////////////////////////////////
 // Shape
 
 struct ShapeDrawDataDesc
 {
-    Buffer* vertexBuffer;
-    Buffer* indexBuffer  = nullptr;
+    VertexBuffer* vertexBuffer;
+    IndexBuffer* indexBuffer  = nullptr;
     std::vector<AttributeType> attributes{};
 };
 

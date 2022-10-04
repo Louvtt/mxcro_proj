@@ -5,19 +5,6 @@
 #include <iostream>
 #define LOG(msg) std::cout << msg << std::endl;
 
-int bufferTypeToGLenum(mx::BufferType _type)
-{
-    switch(_type) {
-        case mx::BufferType::Vertex:
-        case mx::BufferType::DynamicVertex:
-            return GL_ARRAY_BUFFER;
-        case mx::BufferType::Index:
-        case mx::BufferType::DynamicIndex:
-            return GL_ELEMENT_ARRAY_BUFFER;
-    }
-    return GL_ARRAY_BUFFER;
-};
-
 
 static void bindAttr(std::vector<mx::AttributeType> _attributes, u32 stride)
 {
@@ -117,51 +104,33 @@ void mx::ShapeDrawData::draw()
 
 mx::Buffer::Buffer(BufferDesc _desc)
 : desc(_desc)
-{
-    LOG("Creating buffer: " << ((((int)desc.type >> 2) != 0) ? "GL_DYNAMIC_DRAW" : "GL_STATIC_DRAW") << " - " << ((((int)desc.type & 0x3) == 0x1) ? "VERTEX" : "INDEX"));
-    glGenBuffers(1, &ID);
-    glBindBuffer(GL_ARRAY_BUFFER, ID);
-    glBufferData(
-        GL_ARRAY_BUFFER, 
-        desc.count * desc.dataSize,
-        desc.data, 
-        (((int)desc.type >> 2) != 0) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW
-    );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
+{}
+
 mx::Buffer::~Buffer() 
 {
-    glBindVertexArray(0);
-    if(ID != 0) {
-        glDeleteBuffers(1, &ID);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    if(m_Id != 0) {
+        glDeleteBuffers(1, &m_Id);
     } 
-}
-
-void mx::Buffer::bind() 
-{
-    glBindBuffer(bufferTypeToGLenum(desc.type), ID);
-}
-void mx::Buffer::unbind() 
-{
-    glBindBuffer(bufferTypeToGLenum(desc.type), 0);
 }
 
 void mx::Buffer::pushData(void* _data, u32 _count)
 {
     if(currentCount >= desc.count) return; // reach maximum
-    if(((int)desc.type >> 2) == 0) return; // not dynamic buffer
+    if(!desc.dynamic) return; // not dynamic buffer
 
-    glBindBuffer(bufferTypeToGLenum(desc.type), ID);
+    glBindBuffer(GL_ARRAY_BUFFER, m_Id);
     glBufferSubData(GL_ARRAY_BUFFER, currentCount * desc.dataSize, desc.dataSize * _count, _data);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     currentCount += _count;
 
 }
 void mx::Buffer::reset()
 {
-    if(((int)desc.type >> 2) == 0) return;
+    if(!desc.dynamic) return;
 
-    glBindBuffer(bufferTypeToGLenum(desc.type), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     currentCount = 0;
 }
 
@@ -174,4 +143,51 @@ mx::BufferDesc mx::Buffer::getDesc() const
 u32 mx::Buffer::getCount() const
 {
     return currentCount;
+}
+
+mx::VertexBuffer::VertexBuffer(mx::BufferDesc desc)
+: mx::Buffer(desc)
+{
+    LOG("Creating buffer: " << ((desc.dynamic) ? "GL_DYNAMIC_DRAW" : "GL_STATIC_DRAW") << " - VERTEX");
+    glGenBuffers(1, &m_Id);
+    glBindBuffer(GL_ARRAY_BUFFER, m_Id);
+    glBufferData(
+        GL_ARRAY_BUFFER, 
+        desc.count * desc.dataSize,
+        desc.data, 
+        (desc.dynamic) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW
+    );
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void mx::VertexBuffer::bind() 
+{
+    glBindBuffer(GL_ARRAY_BUFFER, m_Id);
+}
+void mx::VertexBuffer::unbind() 
+{
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+mx::IndexBuffer::IndexBuffer(mx::BufferDesc desc)
+: mx::Buffer(desc)
+{
+    LOG("Creating buffer: " << ((desc.dynamic) ? "GL_DYNAMIC_DRAW" : "GL_STATIC_DRAW") << " - INDEX");
+    glGenBuffers(1, &m_Id);
+    glBindBuffer(GL_ARRAY_BUFFER, m_Id);
+    glBufferData(
+        GL_ARRAY_BUFFER, 
+        desc.count * desc.dataSize,
+        desc.data, 
+        (desc.dynamic) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW
+    );
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+void mx::IndexBuffer::bind() 
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Id);
+}
+void mx::IndexBuffer::unbind() 
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
