@@ -184,7 +184,16 @@ constexpr static int translateXKeycode(const KeySym& key)
 constexpr static int translateXButtonCode(int button)
 {
     switch(button)
-    {}
+    {
+        case Button1: return MX_MBUTTON_LEFT;
+        case Button2: return MX_MBUTTON_MIDDLE;
+        case Button3: return MX_MBUTTON_RIGHT;
+        case Button4: return MX_MBUTTON_4;
+        case Button5: return MX_MBUTTON_5;
+        case 6: return MX_MBUTTON_6;
+        case 7: return MX_MBUTTON_7;
+        case 8: return MX_MBUTTON_8;
+    }
 
     return MX_KEY_UNKNOWN;
 }
@@ -372,10 +381,15 @@ void mx::Context::pollEvents()
 
             // mouse
             case ButtonPress:
-                LOG("MousePress: " << e.xbutton.button);
+                if(e.xbutton.button == 4 || e.xbutton.button == 5) {
+                    invokeEvent(mx::ContextEvent::SCROLL, e.xbutton.button == 4 ? -1L : 1L, 0L, 0L);
+                    break;
+                }
+                invokeEvent(mx::ContextEvent::BUTTONPRESS, translateXButtonCode(e.xbutton.button), 0L, 0L);
                 break;
             case ButtonRelease:
-                LOG("MouseRelease: " << e.xbutton.button);
+                if(e.xbutton.button == 4 || e.xbutton.button == 5) break;
+                invokeEvent(mx::ContextEvent::BUTTONRELEASE, translateXButtonCode(e.xbutton.button), 0L, 0L);
                 break;
             case MotionNotify: // mouse move
                 invokeEvent(mx::ContextEvent::MOUSEMOVE, e.xmotion.x, e.xmotion.y, 0L);
