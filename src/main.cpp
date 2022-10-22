@@ -1,8 +1,6 @@
 #include <mx/mxcro.h>
 #include <mxphsx/mxphsx.h>
 
-#include "object.h"
-
 #include <iostream>
 #include <chrono>
 
@@ -18,10 +16,6 @@ int main(int argc, char** argv)
 
     // phsx
     mx::World* world = new mx::World();
-    std::vector<Object*> objects = {
-        new Object(mx::vec2{10.f,  20.f}, 30.f, ObjectShapeType::Box, world),
-        new Object(mx::vec2{10.f, 200.f}, 50.f, ObjectShapeType::Box, world, true)
-    };
 
     // main loop
     double time = 0.;
@@ -36,9 +30,6 @@ int main(int argc, char** argv)
         world->step(delta.count());
 
         // draw
-        for(const auto& o : objects) {
-            o->render(render);
-        }
         render->draw();
 
         // update buffers
@@ -46,9 +37,9 @@ int main(int argc, char** argv)
         ctx->pollEvents();
 
         // update time
-        delta = std::chrono::high_resolution_clock::now() - lastTime;
+        delta    = std::chrono::high_resolution_clock::now() - lastTime;
         lastTime = std::chrono::high_resolution_clock::now();
-        time += delta.count();
+        time    += delta.count();
     }
 
     ctx.reset();
