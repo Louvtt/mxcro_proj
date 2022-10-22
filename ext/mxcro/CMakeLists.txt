@@ -12,6 +12,7 @@ set(HEADER_FILES
     include/mx/contextRender.h
     include/mx/renderAttributeTypes.h
     include/mx/uniformBuffer.h
+    include/mx/texture.h
 )
 
 set(SRC_FILES
@@ -23,6 +24,8 @@ set(SRC_FILES
     src/contextRender.cpp
     src/renderAttributeTypes.cpp
     src/uniformBuffer.cpp
+
+    src/texture.cpp
 )
 
 find_package(X11 REQUIRED)
@@ -50,6 +53,7 @@ target_include_directories(MXCRO
 PUBLIC
     include
     ext/glad/include
+    ext/stb/include
 )
 
 ## Platform support
