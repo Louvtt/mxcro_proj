@@ -51,6 +51,8 @@ public:
 
     void draw();
 
+    mx::Context* getContext() const;
+
 private:
     ContextRenderDesc desc;
 

@@ -165,6 +165,16 @@ void mx::ContextRender::drawRect(mx::vec2 _pos, mx::vec2 _size)
     drawRect(_pos, _size, lastColor);
 }
 
+void mx::ContextRender::drawSRect(mx::vec2 _pos, mx::vec2 _size, mx::Color _color)
+{
+    mx::vec2 hsize = _size * .5f;
+    lastColor = _color;
+    drawLine(_pos - mx::vec2{ hsize.x,  hsize.y}, _pos - mx::vec2{ hsize.x, -hsize.y});
+    drawLine(_pos - mx::vec2{ hsize.x, -hsize.y}, _pos - mx::vec2{-hsize.x, -hsize.y});
+    drawLine(_pos - mx::vec2{-hsize.x, -hsize.y}, _pos - mx::vec2{-hsize.x,  hsize.y});
+    drawLine(_pos - mx::vec2{-hsize.x,  hsize.y}, _pos - mx::vec2{ hsize.x,  hsize.y});
+}
+
 void mx::ContextRender::drawPoint(mx::vec2 _pos, float _radius)
 {
     drawPoint(_pos, _radius, lastColor);
@@ -222,6 +232,9 @@ void mx::ContextRender::resize(u32 _sx, u32 _sy)
     cameraUbo.setAttributesValues((void*)&cam);
 }
 
+mx::Context* mx::ContextRender::getContext() const {
+    return desc.context;
+}
 
 constexpr float inv_255 = 1.f / 255.f;
 mx::Color::Color(float _r, float _g, float _b, float _a)
