@@ -63,6 +63,8 @@ public:
     u32 getRendererID() const;
 
 private:
+    void createInternal(void* data);
+
     int m_binding = 0;
 
     u32 m_ID = 0;
@@ -74,18 +76,18 @@ private:
     TextureFilter m_filter;
 };
 
-class Subtexture
+class SubTexture
 {
 public:
-    Subtexture(Texture& tex, TextureRect src);
+    SubTexture(Texture* tex, TextureRect src);
 
-    u32         getRendererID()  const;
     TextureRect getTextureRect() const;
+    Texture*    getTexture() const;
 
-    static std::vector<Subtexture> SplitTexture(Texture& texture, int cols, int rows);
+    static std::vector<SubTexture> SplitTexture(Texture* texture, int cols, int rows);
 
 private:
-    Texture& m_tex;
+    Texture* m_tex;
     TextureRect m_src;
 };
 

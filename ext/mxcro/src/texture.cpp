@@ -6,19 +6,19 @@
 
 #include <iostream>
 
-static GLenum format[] = {
+static const GLenum GLFORMATS[] = {
     GL_RED,
     GL_RG,
     GL_RGB,
     GL_RGBA
 };
 
-static GLenum filters[] = {
+static const GLint GLFILTERS[] = {
     GL_NEAREST,
     GL_LINEAR
 };
 
-static GLenum wrap[] = {
+static const GLint GLWRAPS[] = {
     GL_CLAMP_TO_EDGE,
     GL_REPEAT,
     GL_MIRRORED_REPEAT
@@ -27,43 +27,37 @@ static GLenum wrap[] = {
 mx::Texture::Texture(const mx::TextureDesc& desc)
 : m_filter(desc.filter), m_mode(desc.mode)
 {
+    stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(desc.path, &m_sizeX, &m_sizeY, &m_channels, 0);
     if(data == NULL) {
         std::cerr << "ERR: Image loading failure\n";
     }
-
-    // load opengl
-    glGenTextures(1, &m_ID);
-    glBindTexture(GL_TEXTURE_2D, m_ID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_sizeX, m_sizeY, 0, format[m_channels-1], GL_UNSIGNED_BYTE, data);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filters[(int)desc.filter]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filters[(int)desc.filter]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap[(int)desc.mode]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap[(int)desc.mode]);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
+    createInternal((void*)data);
     std::cout << "Creating texture from file: " << m_ID << std::endl;
+    stbi_image_free(data);
 }
 
 mx::Texture::Texture(const mx::TextureImageDesc& desc)
 : m_sizeX(desc.width), m_sizeY(desc.height), m_channels(desc.channels),
 m_filter(desc.filter), m_mode(desc.mode)
 {
+    createInternal(desc.data);
+    std::cout << "Creating texture from raw data: " << m_ID << std::endl;
+}
+
+void mx::Texture::createInternal(void* data)
+{
     // load opengl
     glGenTextures(1, &m_ID);
     glBindTexture(GL_TEXTURE_2D, m_ID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_sizeX, m_sizeY, 0, format[m_channels-1], GL_UNSIGNED_BYTE, desc.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_sizeX, m_sizeY, 0, GLFORMATS[m_channels-1], GL_UNSIGNED_BYTE, data);
     
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filters[(int)desc.filter]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filters[(int)desc.filter]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap[(int)desc.mode]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap[(int)desc.mode]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GLFILTERS[(int)m_filter]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GLFILTERS[(int)m_filter]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLWRAPS[(int)m_mode]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLWRAPS[(int)m_mode]);
 
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    std::cout << "Creating texture from raw data: " << m_ID << std::endl;
 }
 
 void mx::Texture::bind(int idx) {
@@ -92,36 +86,36 @@ u32 mx::Texture::getSizeY() const {
 void mx::Texture::updateData(void* data)
 {
     glBindTexture(GL_TEXTURE_2D, m_ID);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_sizeX, m_sizeY, format[(int)m_mode], GL_UNSIGNED_BYTE, data);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_sizeX, m_sizeY, GLFORMATS[(int)m_mode], GL_UNSIGNED_BYTE, data);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 /// SUBTEXTURE
 
-mx::Subtexture::Subtexture(mx::Texture& tex, mx::TextureRect rect)
+mx::SubTexture::SubTexture(mx::Texture* tex, mx::TextureRect rect)
 : m_tex(tex), m_src(rect)
 { }
 
-std::vector<mx::Subtexture>
-mx::Subtexture::SplitTexture(mx::Texture& tex, int cols, int rows)
+std::vector<mx::SubTexture>
+mx::SubTexture::SplitTexture(mx::Texture* tex, int cols, int rows)
 {
-    std::vector<mx::Subtexture> res{};
+    std::vector<mx::SubTexture> res{};
     float ds = 1.f/(float)cols;
     float dt = 1.f/(float)rows;
     for(int i = 0; i < rows; ++i) 
         for(int j = 0; j < cols; ++j)
-            res.push_back(Subtexture(
+            res.push_back(SubTexture(
                 tex,
                 mx::TextureRect{ds*i,dt*j,ds,dt}
             ));
     return res;
 }
 
-u32 mx::Subtexture::getRendererID() const {
-    return m_tex.getRendererID();
+mx::Texture* mx::SubTexture::getTexture() const {
+    return m_tex;
 }
 
 mx::TextureRect
-mx::Subtexture::getTextureRect() const {
+mx::SubTexture::getTextureRect() const {
     return m_src;
 }

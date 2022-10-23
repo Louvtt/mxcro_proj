@@ -227,6 +227,8 @@ void mx::Context::setupBase()
         glEnable(GL_DEPTH);
     }
 
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     registerOnResize([](u32 _sizex, u32 _sizey, void* params){
         mx::Context* target = (mx::Context*)params;
         target->desc.sizex = _sizex;
