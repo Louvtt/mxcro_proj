@@ -18,6 +18,7 @@ set(HEADER_FILES
 set(SRC_FILES
     src/buffers.cpp
     src/math.cpp
+    src/types.cpp
     src/shader.cpp
 
     src/context.cpp
