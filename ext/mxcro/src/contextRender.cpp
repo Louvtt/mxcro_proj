@@ -2,6 +2,7 @@
 
 #include "mx/contextRender.h"
 #include "mx/context.h"
+#include "mx/types.h"
 
 #include <iostream>
 #define LOG(msg) std::cout << msg << std::endl;
@@ -52,13 +53,43 @@ const char* fCode_circle = ""
 "   frag = color;\n"
 "   if(length(tex - vec2(.5)) > .48) discard;\n"
 "}";
+const char* vCode_texture = ""
+"#version 460 core\n"
+"layout (location = 0) in vec2 aPos;\n"
+"layout (location = 1) in vec2 aTex;\n"
+"layout (location = 2) in vec4 aColor;\n"
+"layout (location = 3) in float aTexID;\n"
+"out vec4 color;\n"
+"out vec2 texCoords;\n"
+"out float texID;\n"
+"layout (std140) uniform camera {"
+"   mat4 uProj;\n"
+"   mat4 uView;\n"
+"};"
+"void main() {\n"
+"   gl_Position = uProj * uView * vec4(aPos.x, aPos.y, 0, 1);\n"
+"   texCoords = aTex;\n"
+"   color = aColor;\n"
+"   texID = aTexID;"
+"}";
+const char* fCode_texture = ""
+"#version 460 core\n"
+"in vec4 color;\n"
+"in vec2 texCoords;\n"
+"in float texID;\n"
+"uniform sampler2D tex[32];\n"
+"out vec4 frag;\n"
+"void main() {\n"
+"   frag = texture(tex[int(texID)], texCoords) * color;\n"
+"}";
 
 mx::ContextRender::ContextRender(const mx::ContextRenderDesc& _desc)
 : desc(_desc),
 shader(new mx::Shader(vCode, fCode)),
 circleShader(new mx::Shader(vCode_circle, fCode_circle)),
+textureShader(new mx::Shader(vCode_texture, fCode_texture)),
 cameraUbo({ "camera", { mx::AttributeType::Mat4, mx::AttributeType::Mat4 }}),
-drawData(nullptr), circleDrawData(nullptr)
+drawData(nullptr), circleDrawData(nullptr), textureDrawData(nullptr)
 {
     std::vector<u32> quadIndices = {};
     quadIndices.reserve(desc.maxBatchCapacity * 6);
@@ -114,6 +145,31 @@ drawData(nullptr), circleDrawData(nullptr)
             mx::AttributeType::Pos2D,
             mx::AttributeType::TexCoords2D,
             mx::AttributeType::RGBA
+        }
+    });
+
+    // texture
+    textures.fill(nullptr); // no tex
+    textureDrawData = new mx::ShapeDrawData({
+        new mx::VertexBuffer(
+        mx::BufferDesc{
+            desc.maxBatchCapacity * 4,
+            true,
+            sizeof(TextureVertex),
+            nullptr
+        }),
+        new mx::IndexBuffer(
+        mx::BufferDesc{
+            desc.maxBatchCapacity * 6,
+            false,
+            sizeof(u32),
+            quadIndices.data()
+        }),
+        {
+            mx::AttributeType::Pos2D,
+            mx::AttributeType::TexCoords2D,
+            mx::AttributeType::RGBA,
+            mx::AttributeType::Float
         }
     });
 
@@ -181,10 +237,53 @@ void mx::ContextRender::drawPoint(mx::vec2 _pos, float _radius)
 }
 void mx::ContextRender::drawPoint(mx::vec2 _pos, float _radius, mx::Color _color)
 {
-    circleVertices.push_back({ {_pos.x - _radius, _pos.y - _radius}, {1.f, 1.f}, _color });
-    circleVertices.push_back({ {_pos.x + _radius, _pos.y - _radius}, {0.f, 1.f}, _color });
-    circleVertices.push_back({ {_pos.x + _radius, _pos.y + _radius}, {0.f, 0.f}, _color });
-    circleVertices.push_back({ {_pos.x - _radius, _pos.y + _radius}, {1.f, 0.f}, _color });
+    circleVertices.push_back({ {_pos.x - _radius, _pos.y - _radius}, {0.f, 0.f}, _color });
+    circleVertices.push_back({ {_pos.x + _radius, _pos.y - _radius}, {1.f, 0.f}, _color });
+    circleVertices.push_back({ {_pos.x + _radius, _pos.y + _radius}, {1.f, 1.f}, _color });
+    circleVertices.push_back({ {_pos.x - _radius, _pos.y + _radius}, {0.f, 1.f}, _color });
+}
+
+void mx::ContextRender::drawTexture(mx::vec2 _pos, mx::vec2 _size, mx::Texture* _tex)
+{
+    int texID = 0; 
+    if(std::find(textures.begin(), textures.end(), _tex) == textures.end()
+    && currentTex < 32) {
+        texID = currentTex;
+        textures[currentTex++] = _tex;
+    }
+
+    mx::vec2 hsize = _size * .5f;
+    textureVertices.push_back({ {_pos.x + hsize.x, _pos.y + hsize.y}, {1.f, 1.f}, lastColor, (float)texID });
+    textureVertices.push_back({ {_pos.x + hsize.x, _pos.y - hsize.y}, {1.f, 0.f}, lastColor, (float)texID });
+    textureVertices.push_back({ {_pos.x - hsize.x, _pos.y - hsize.y}, {0.f, 0.f}, lastColor, (float)texID });
+    textureVertices.push_back({ {_pos.x - hsize.x, _pos.y + hsize.y}, {0.f, 1.f}, lastColor, (float)texID });
+}
+
+void mx::ContextRender::drawTexture(mx::vec2 _pos, float _sizeFactor, Texture* _tex)
+{
+    mx::vec2 size = mx::vec2{
+        (f32)_tex->getSizeX() * _sizeFactor,
+        (f32)_tex->getSizeY() * _sizeFactor
+    };
+    drawTexture(_pos, size,  _tex);
+}
+
+void mx::ContextRender::drawTexture(mx::vec2 _pos, mx::vec2 _size, mx::SubTexture* _tex)
+{
+    int texID = 0; 
+    if(std::find(textures.begin(), textures.end(), _tex->getTexture()) == textures.end()
+    && currentTex < 32) {
+        texID = currentTex;
+        textures[currentTex++] = _tex->getTexture();
+    }
+
+    mx::TextureRect r = _tex->getTextureRect();
+    
+    mx::vec2 hsize = _size * .5f;
+    textureVertices.push_back({ {_pos.x - hsize.x, _pos.y - hsize.y}, {r.x + r.w, r.y + r.h}, lastColor, (float)texID });
+    textureVertices.push_back({ {_pos.x + hsize.x, _pos.y - hsize.y}, {r.x + r.w, r.y      }, lastColor, (float)texID });
+    textureVertices.push_back({ {_pos.x + hsize.x, _pos.y + hsize.y}, {r.x      , r.y      }, lastColor, (float)texID });
+    textureVertices.push_back({ {_pos.x - hsize.x, _pos.y + hsize.y}, {r.x      , r.y + r.w}, lastColor, (float)texID });
 }
 
 void mx::ContextRender::translateView(mx::vec2 translation)
@@ -224,6 +323,28 @@ void mx::ContextRender::draw()
 
     data.vertexBuffer->reset();
     circleVertices.clear();
+
+    // third batch
+    cameraUbo.bind(shader);
+
+    data = textureDrawData->getData();
+    data.vertexBuffer->pushData(textureVertices.data(), textureVertices.size());
+
+    textureShader->bind();
+    // bind textures
+    std::string baseTexBindPoint = "tex[";
+    for(int i = 0; i < textures.size(); ++i) {
+        if(!textures[i]) break;
+        textures[i]->bind(i);
+        textureShader->setInt(baseTexBindPoint + std::to_string(i) + "]", i);
+    }
+    textureDrawData->draw();
+    textureShader->unbind();
+
+    data.vertexBuffer->reset();
+    textureVertices.clear();
+    textures.fill(nullptr);
+    currentTex = 0;
 }
 
 void mx::ContextRender::resize(u32 _sx, u32 _sy)
@@ -235,10 +356,3 @@ void mx::ContextRender::resize(u32 _sx, u32 _sy)
 mx::Context* mx::ContextRender::getContext() const {
     return desc.context;
 }
-
-constexpr float inv_255 = 1.f / 255.f;
-mx::Color::Color(float _r, float _g, float _b, float _a)
-: r(_r), g(_g), b(_b), a(_a) {}
-mx::Color::Color(int _r, int _g, int _b, float _a)
-: a(_a), r((float)_r * inv_255), g((float)_g * inv_255), b((float)_b * inv_255)
-{}

@@ -3,8 +3,10 @@
 
 #include "shader.h"
 #include "buffers.h"
+#include "texture.h"
 #include "uniformBuffer.h"
 #include <vector>
+#include <array>
 #include "math.h"
 
 namespace mx
@@ -16,14 +18,6 @@ struct ContextRenderDesc
 {
     unsigned int maxBatchCapacity = 4096;
     Context* context;
-};
-
-struct Color { 
-    float r, g, b;
-    float a;
-
-    Color(float r, float g, float b, float a=1.f);
-    Color(int r, int g, int b, float a = 1.f);
 };
 
 class ContextRender
@@ -42,6 +36,10 @@ public:
     void drawSRect(vec2 pos, vec2 size, Color color);
     void drawPoint(vec2 pos, float radius);
     void drawPoint(vec2 pos, float radius, Color color);
+    
+    void drawTexture(vec2 pos, vec2 size, SubTexture* tex);
+    void drawTexture(vec2 pos, vec2 size, Texture* tex);
+    void drawTexture(vec2 pos, float sizeFactor, Texture* tex);
 
     void translateView(vec2 translation);
     void rotateView(float angle);
@@ -73,9 +71,20 @@ private:
     std::vector<CircleVertex> circleVertices;
     ShapeDrawData* circleDrawData;
 
+    Shader* textureShader;
+    struct TextureVertex {
+        mx::vec2 pos;
+        mx::vec2 tex;
+        mx::Color col; 
+        float texID;
+    };
+    std::vector<TextureVertex> textureVertices;
+    std::array<Texture*, 32> textures;
+    int currentTex = 0;
+    ShapeDrawData* textureDrawData;
+
     Color lastColor = { 1.f, 1.f, 1.f, 1.f };
     int lineWidth = 1;
-
 
     struct CameraData {
         mat4 proj;
