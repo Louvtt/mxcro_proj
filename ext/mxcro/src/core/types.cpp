@@ -1,4 +1,4 @@
-#include "mx/types.h"
+#include "mx/core/types.hpp"
 
 constexpr float inv_255 = 1.f / 255.f;
 mx::Color::Color(float _r, float _g, float _b, float _a)

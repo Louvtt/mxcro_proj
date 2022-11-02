@@ -4,37 +4,52 @@ add_subdirectory(ext)
 ## SETUP FILES
 
 set(HEADER_FILES
-    include/mx/buffers.h
-    include/mx/context.h
-    include/mx/math.h
-    include/mx/shader.h
-    include/mx/types.h
-    include/mx/contextRender.h
-    include/mx/renderAttributeTypes.h
-    include/mx/uniformBuffer.h
-    include/mx/texture.h
+    include/mx/core/context.hpp
+    include/mx/core/types.hpp
+
+    include/mx/gfx/buffers.hpp
+    include/mx/gfx/shapeDrawData.hpp
+    include/mx/gfx/batch.hpp
+    include/mx/gfx/shader.hpp
+    include/mx/gfx/contextRender.hpp
+    include/mx/gfx/contextRender3D.hpp
+    include/mx/gfx/renderAttributeTypes.hpp
+    include/mx/gfx/uniformBuffer.hpp
+    include/mx/gfx/texture.hpp
+
+    include/mx/maths/math.hpp
+    include/mx/maths/vec2.hpp
+    include/mx/maths/vec3.hpp
+    include/mx/maths/mat4.hpp
+
+    include/mx/io/keycodes.hpp
 )
 
 set(SRC_FILES
-    src/buffers.cpp
-    src/math.cpp
-    src/types.cpp
-    src/shader.cpp
+    src/core/context.cpp
+    src/core/types.cpp
 
-    src/context.cpp
-    src/contextRender.cpp
-    src/renderAttributeTypes.cpp
-    src/uniformBuffer.cpp
+    src/gfx/buffers.cpp
+    src/gfx/shapeDrawData.cpp
+    src/gfx/shader.cpp
+    src/gfx/contextRender.cpp
+    src/gfx/contextRender3D.cpp
+    src/gfx/renderAttributeTypes.cpp
+    src/gfx/uniformBuffer.cpp
+    src/gfx/texture.cpp
 
-    src/texture.cpp
+    src/maths/math.cpp
+    src/maths/vec2.cpp
+    src/maths/vec3.cpp
+    src/maths/mat4.cpp
 )
 
 find_package(X11 REQUIRED)
 if(X11_FOUND)
-    list(APPEND SRC_FILES src/context_x11.cpp)
+    list(APPEND SRC_FILES src/core/context_x11.cpp)
 endif()
 if(WIN32)
-    list(APPEND SRC_FILES src/context_win32.cpp)
+    list(APPEND SRC_FILES src/core/context_win32.cpp)
 endif()
 
 ## BUILD LIB

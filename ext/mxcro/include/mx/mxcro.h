@@ -1,6 +1,0 @@
-#include "buffers.h"
-#include "context.h"
-#include "math.h"
-#include "shader.h"
-#include "types.h"
-#include "keycodes.h"
