@@ -4,10 +4,11 @@
 #include <array>
 #include <random>
 
-#ifndef _MX_MATH_H_
-#define _MX_MATH_H_
 namespace mx
 {
+
+#ifndef _MX_MATHS_VEC2_H_
+#define _MX_MATHS_VEC2_H_
 
 struct vec2
 {
@@ -43,7 +44,10 @@ struct vec2
     float cross(const vec2& other) const;
     vec2 cross(float other) const;
 };
+#endif //_MX_MATHS_VEC2_H_
 
+#ifndef _MX_MATHS_MAT4_H_
+#define _MX_MATHS_MAT4_H_
 class mat4
 {
 public:
@@ -56,10 +60,11 @@ public:
 
     std::array<float, 16> data{};
 };
-
+#endif //_MX_MATHS_MAT4_H_
 
 // calculus
-
+#ifndef _MX_MATHS_CALCULUS_H_
+#define _MX_MATHS_CALCULUS_H_
 // linear interpolation between start and end
 float lerp(float start, float end, float t);
 vec2 lerp(vec2 start, vec2 end, float t);
@@ -77,9 +82,8 @@ private:
     std::random_device device;
     std::mt19937 gen;
 };
+#endif //_MX_MATHS_CALCULUS_H_
 
 } // namespace mx
-
-#endif //_MX_MATH_H_
 
 #endif //_MXPHSX_MATH_H_
