@@ -22,8 +22,11 @@ public:
     // Look at
     static mat4 lookAt(vec3 pos, vec3 target, vec3 up = vec3{0.f, 1.f, 0.f});
 
+    // column major
     std::array<float, 16> data{};
 };
+
+std::ostream& operator<<(std::ostream& o, const mat4& m);
 
 } // namespace mx
 

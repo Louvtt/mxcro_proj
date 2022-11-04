@@ -3,6 +3,7 @@
 
 #include "calculus.hpp"
 
+
 namespace mx {
 
 struct vec2
@@ -39,6 +40,7 @@ struct vec2
 };
 
 vec2 lerp(vec2 start, vec2 end, float t);
+std::ostream& operator<<(std::ostream& o, const vec2& v);
 
 } // namespace mx
 

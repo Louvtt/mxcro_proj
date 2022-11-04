@@ -1,5 +1,6 @@
 #include "mx/maths/vec2.hpp"
 
+#include <iostream>
 
 // VEC2 
 
@@ -102,4 +103,10 @@ float mx::vec2::dot(const mx::vec2& other) const
 mx::vec2 mx::lerp(mx::vec2 start, mx::vec2 end, float t)
 {
     return end * t + start * (1 - t);
+}
+
+std::ostream& mx::operator<<(std::ostream& o, const mx::vec2& v)
+{
+    o << "vec2 [" << v.x << ", " << v.y << "]";
+    return o;
 }

@@ -1,5 +1,7 @@
 #include "mx/maths/vec3.hpp"
 
+#include <iostream>
+
 ///////////////////////////////////////
 // VEC3
 
@@ -94,7 +96,7 @@ mx::vec3 mx::vec3::normalized() const
 {
     float l = sqrt(x*x + y*y + z*z);
     // avoid dividing by zero
-    if(l == 0) return mx::vec3{0.f, 0.f};
+    if(l == 0) return mx::vec3{0.f, 0.f, 0.f};
 
     float inv_l = 1.f / l;
     return mx::vec3{
@@ -112,7 +114,12 @@ mx::vec3 mx::vec3::cross(const mx::vec3& other) const
 {
     return mx::vec3 {
         y * other.z - z * other.y,
-        x * other.z - z * other.x,
-        x * other.y - y * other.y
+        z * other.x - x * other.z,
+        x * other.y - y * other.x
     };
+}
+std::ostream& mx::operator<<(std::ostream& o, const mx::vec3& v)
+{
+    o << "vec3 [" << v.x << ", " << v.y << ", " << v.z << "]";
+    return o;
 }

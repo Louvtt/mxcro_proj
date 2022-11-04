@@ -40,6 +40,8 @@ struct vec3
     vec3 cross(const vec3& other) const;
 };
 
+std::ostream& operator<<(std::ostream& o, const vec3& v);
+
 } // namespace mx
 
 
