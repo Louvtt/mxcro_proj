@@ -224,8 +224,10 @@ void mx::Context::setupBase()
     // glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glViewport(0, 0, desc.sizex, desc.sizey);
-    if((int)desc.flags & (int)mx::ContextFlags::Support3D != 0) {
-        glEnable(GL_DEPTH);
+    if(((int)desc.flags & (int)mx::ContextFlags::Support3D) != 0) {
+        LOG("Enabling depth testing");
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
     }
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -254,7 +256,7 @@ void mx::Context::setupBase()
 void mx::Context::clear(float r, float g, float b, float a)
 {
     glClearColor(r, g, b, a);
-    if(((int)desc.flags & 0x10) != 0) {
+    if(((int)desc.flags & (int)mx::ContextFlags::Support3D) != 0) {
         glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     } else {
         glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
