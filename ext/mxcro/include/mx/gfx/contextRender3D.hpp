@@ -9,6 +9,7 @@
 
 namespace mx {
 
+class ShapeInstance;
 class Shader;
 class ShapeDrawData;
 class Context;
@@ -16,19 +17,6 @@ struct ContextRender3DDesc
 {
     unsigned int maxBatchCapacity = 4096;
     Context* context;
-};
-
-class ShapeInstance
-{
-public:
-    ShapeInstance(ShapeDrawData* shape, Shader* shader, u32 reservedCount);
-    void add(const vec3& pos);
-
-    void draw(mx::UniformBuffer* cameraUbo);
-private:
-    ShapeDrawData* shape;
-    Shader* shader;
-    std::vector<vec3> positions;
 };
 
 class ContextRender3D

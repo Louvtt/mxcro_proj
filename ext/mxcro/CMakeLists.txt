@@ -9,6 +9,7 @@ set(HEADER_FILES
 
     include/mx/gfx/buffers.hpp
     include/mx/gfx/shapeDrawData.hpp
+    include/mx/gfx/shapeInstance.hpp
     include/mx/gfx/batch.hpp
     include/mx/gfx/shader.hpp
     include/mx/gfx/contextRender.hpp
@@ -31,6 +32,7 @@ set(SRC_FILES
 
     src/gfx/buffers.cpp
     src/gfx/shapeDrawData.cpp
+    src/gfx/shapeInstance.cpp
     src/gfx/shader.cpp
     src/gfx/contextRender.cpp
     src/gfx/contextRender3D.cpp
