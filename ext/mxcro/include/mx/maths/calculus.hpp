@@ -12,13 +12,31 @@ namespace mx
 ////////////
 // Helpers
 
+/**
+ * @brief Convert degrees to radians
+ * @param degrees angle in degrees
+ * @return float angle in radians
+ */
 float degreesToRadians(float degrees);
 
 ////////////
 // Calculus
 
-// linear interpolation between start and end
+/**
+ * @brief Linear interpolate between start and end
+ * @param start start value
+ * @param end end value
+ * @param t interpolation [0-1]
+ * @return float - interpolated value
+ */
 float lerp(float start, float end, float t);
+/**
+ * @brief Clamp a value between min and max
+ * @param value value to clamp
+ * @param min minimum
+ * @param max maximum
+ * @return float the clamped value 
+ */
 float clamp(float value, float min, float max);
 
 //////////

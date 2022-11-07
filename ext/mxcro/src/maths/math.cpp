@@ -5,6 +5,7 @@
 #include <limits.h>
 
 constexpr float DEG2RAD = M_PI / 180.f;
+
 float mx::degreesToRadians(float degrees)
 {
     return degrees * DEG2RAD;

@@ -109,16 +109,27 @@ mx::mat4 mx::mat4::lookAt(vec3 _pos, vec3 _target, vec3 _up)
     return res;
 }
 
+std::array<float, 16> mx::mat4::getData() const {
+    return data;
+}
+void mx::mat4::setData(int i, int j, float value) {
+    data[IX(i,j)] = value;
+}
+void mx::mat4::setData(std::array<float, 16> newData) {
+    data = newData;
+}
+
 std::ostream& mx::operator<<(std::ostream& o, const mat4& m) {
+    std::array<float, 16> data = m.getData();
     o << "mat4\n";
     char buf[512];
-    snprintf(buf, 512, "[%+5f %+5f %+5f %+5f]\n", m.data[IX(0, 0)], m.data[IX(1, 0)], m.data[IX(2, 0)], m.data[IX(3, 0)]);
+    snprintf(buf, 512, "[%+5f %+5f %+5f %+5f]\n", data[IX(0, 0)], data[IX(1, 0)], data[IX(2, 0)], data[IX(3, 0)]);
     o << buf;
-    snprintf(buf, 512, "[%+5f %+5f %+5f %+5f]\n", m.data[IX(0, 1)], m.data[IX(1, 1)], m.data[IX(2, 1)], m.data[IX(3, 1)]);
+    snprintf(buf, 512, "[%+5f %+5f %+5f %+5f]\n", data[IX(0, 1)], data[IX(1, 1)], data[IX(2, 1)], data[IX(3, 1)]);
     o << buf;
-    snprintf(buf, 512, "[%+5f %+5f %+5f %+5f]\n", m.data[IX(0, 2)], m.data[IX(1, 2)], m.data[IX(2, 2)], m.data[IX(3, 2)]);
+    snprintf(buf, 512, "[%+5f %+5f %+5f %+5f]\n", data[IX(0, 2)], data[IX(1, 2)], data[IX(2, 2)], data[IX(3, 2)]);
     o << buf;
-    snprintf(buf, 512, "[%+5f %+5f %+5f %+5f]\n", m.data[IX(0, 3)], m.data[IX(1, 3)], m.data[IX(2, 3)], m.data[IX(3, 3)]);
+    snprintf(buf, 512, "[%+5f %+5f %+5f %+5f]\n", data[IX(0, 3)], data[IX(1, 3)], data[IX(2, 3)], data[IX(3, 3)]);
     o << buf << '\n';
     return o;
 }

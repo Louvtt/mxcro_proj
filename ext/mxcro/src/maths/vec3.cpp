@@ -123,3 +123,8 @@ std::ostream& mx::operator<<(std::ostream& o, const mx::vec3& v)
     o << "vec3 [" << v.x << ", " << v.y << ", " << v.z << "]";
     return o;
 }
+
+mx::vec3 mx::lerp(vec3 start, vec3 end, float t)
+{
+    return end * t + start * (1 - t);
+}

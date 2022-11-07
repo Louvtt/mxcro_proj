@@ -4,9 +4,13 @@
 // to convert into namespaced constexpr values?
 
 // Key states
+// Key up state (release + up)
 #define MX_STATE_UP      0
+// key press state (last 1 frame)
 #define MX_STATE_PRESS   1 // 1 frame
+// key down state (press + down)
 #define MX_STATE_DOWN    2
+// key release state (last 1 frame)
 #define MX_STATE_RELEASE 3 // 1 frame
 
 // The unknown key

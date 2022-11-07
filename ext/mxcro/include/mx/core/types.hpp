@@ -17,13 +17,34 @@ using f32 = float;
 using f64 = double;
 
 namespace mx {
+    /**
+     * @brief RGBA Color
+     */
     struct Color
     { 
+        /** color channels */
         float r, g, b;
+        /** alpha channel */
         float a;
 
-        Color(float r, float g, float b, float a=1.f);
-        Color(int r, int g, int b, float a = 1.f);
+        /**
+         * @brief Construct a new Color
+         * 
+         * @param red red channel [0-1]
+         * @param green green channel [0-1]
+         * @param blue blue channel [0-1]
+         * @param alpha alpha channel [0-1]
+         */
+        Color(float red, float green, float blue, float alpha=1.f);
+        /**
+         * @brief Construct a new Color
+         * 
+         * @param red red channel [0-255]
+         * @param green green channel [0-255]
+         * @param blue blue channel [0-255]
+         * @param alpha alpha channel [0-1]
+         */
+        Color(int red, int green, int blue, float alpha = 1.f);
     };
 }
 

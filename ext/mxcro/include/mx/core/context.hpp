@@ -33,6 +33,9 @@ typedef void (*GLAPIFN)();
 GLAPIFN glGetProcAddress(const char* name);
 void createGLContext(int targetID);
 
+/**
+ * @brief Flags for the context creation state
+ */
 enum class ContextFlags
 {
     Default     = 0x00,
@@ -42,6 +45,10 @@ enum class ContextFlags
     Support3D   = 0x10
 };
 
+/**
+ * @brief Hints for loading OpenGL
+ * 
+ */
 enum class ContextHint
 {
     GLVERSION_MAJOR,
@@ -74,14 +81,24 @@ namespace ContextEvent {
 } // namespace Event
 void invoke(int _targetID, mx::ContextEvent::code _code, u32 _arg0, u32 _arg1, u32 _arg2);
 
+/**
+ * @brief Context creation struct params
+ */
 struct ContextDesc
 {
+    /** Name of the window */
     std::string name = "MX";
+    /** Size of the window */
     u32 sizex = 0, sizey = 0;
+    /** Creation state flags */
     ContextFlags flags = ContextFlags::Default;
+    /** OpenGL Hints (see ContextHints)*/
     int hints[3] = { 4, 6, 1 };
 };
 
+/**
+ * @brief Platform-specific Handle of a window 
+ */
 struct PlatformHandle
 {
     #if defined(_WIN32) || defined(_WIN64)
@@ -98,18 +115,43 @@ struct PlatformHandle
     #endif
 };
 
+/**
+ * @brief Window with an OpenGL Context
+ */
 class Context
 {
 public:
+    /**
+     * @brief Construct a new Context
+     * @param desc Creation state params
+     */
     Context(const ContextDesc& desc);
+    /**
+     * @brief Destroy the OpenGL Context and the renderers associated
+     */
     ~Context();
 
+    /**
+     * @brief Return true if the window should be closed
+     * 
+     * @return true the window should close
+     * @return false the window should stay open
+     */
     bool shouldClose() const;
+    /**
+     * @brief Make the OpenGL context current
+     */
     void makeCurrent();
+    /**
+     * @brief Swap the buffers of the OpenGL Context
+     */
     void swapBuffers();
 
     // events
 
+    /**
+     * @brief Update the event list and handle the events
+     */
     void pollEvents();
 
     void registerOnResize(ContextEvent::RESIZEFN func, void* params);
@@ -122,17 +164,49 @@ public:
 
     // data
 
+    /**
+     * @brief Get the Size X of the window (width)
+     * @return u32 
+     */
     u32 getSizeX() const;
+    /**
+     * @brief Get the Size Y of the window (height)
+     * @return u32 
+     */
     u32 getSizeY() const;
 
+    /**
+     * @brief Get the Platform Handle
+     * @return PlatformHandle 
+     */
     PlatformHandle getPlatformHandle() const;
+    /**
+     * @brief Get the Description of the Context
+     * @return ContextDesc 
+     */
     ContextDesc getDesc() const;
 
+    /**
+     * @brief Get the native 2D Renderer
+     * @return ContextRender* 
+     */
     ContextRender* get2DRenderer() const;
+    /**
+     * @brief Get the native 3D Renderer 
+     * @return ContextRender3D* 
+     */
     ContextRender3D* get3DRenderer() const;
 
     // Base Render methods
-    void clear(float r, float g, float b, float a = 1.F);
+
+    /**
+     * @brief Clear the buffer
+     * @param red red channel [0-1]
+     * @param green green channel [0-1]
+     * @param blue blue channel [0-1] 
+     * @param alpha channel [0-1] 
+     */
+    void clear(float red, float green, float blue, float alpha = 1.F);
 
 private:
     ContextDesc desc;
