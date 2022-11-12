@@ -546,6 +546,7 @@ mx::Context::Context(const mx::ContextDesc& _desc)
 mx::Context::~Context()
 {   
     render.reset();
+    render3D.reset();
     close = true;
     // release hglrc
     wglMakeCurrent(NULL, NULL);
