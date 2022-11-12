@@ -371,16 +371,16 @@ void mx::createGLContext(int _targetID)
     LOG("GL_VERSION: " << (char*)glGetString(GL_VERSION));
 }
 
-void mx::invoke(int _targetID, mx::ContextEvent::code _code, u32 _arg0, u32 _arg1, u32 _arg2)
+void mx::invoke(int _targetID, mx::CoreEventCode _code, u32 _arg0, u32 _arg1, u32 _arg2, u32 extra)
 {
     if(hwndIDToContext.find(_targetID) == hwndIDToContext.end()) return;
     mx::Context* targetWin = hwndIDToContext[_targetID];
-    if(_code == mx::ContextEvent::CLOSE)
+    if(_code == mx::CoreEventCode::Close)
     {
-        targetWin->close = true;
+        targetWin->setShouldClose(true);
         return;
     }
-    targetWin->invokeEvent(_code, _arg0, _arg1, _arg2);
+    mx::invokeEvent(_code, _arg0, _arg1, _arg2, extra, (void*)targetWin);
 }
 
 
@@ -392,46 +392,46 @@ LRESULT _stdcall WindowProc(HWND _hwnd, UINT _uMsg, WPARAM _wParam, LPARAM _lPar
     {
         // handled events
         case WM_SIZE:
-            mx::invoke(targetID, mx::ContextEvent::RESIZE, LOWORD(_lParam), HIWORD(_lParam), 0);
+            mx::invoke(targetID, mx::CoreEventCode::Resize, (u32)LOWORD(_lParam), (u32)HIWORD(_lParam), 0, 0);
             return 0;
         // MOUSE
         case WM_MOUSEMOVE:
-            mx::invoke(targetID, mx::ContextEvent::MOUSEMOVE, GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam), 0);
+            mx::invoke(targetID, mx::CoreEventCode::MouseMove, (u32)GET_X_LPARAM(_lParam), (u32)GET_Y_LPARAM(_lParam), 0, 0);
             return 0;
         case WM_MOUSEWHEEL:
-            mx::invoke(targetID, mx::ContextEvent::SCROLL, GET_WHEEL_DELTA_WPARAM(_wParam), 0, 0);
+            mx::invoke(targetID, mx::CoreEventCode::Scroll, (u32)GET_WHEEL_DELTA_WPARAM(_wParam), 0, 0, 0);
             return 0;
         // BUTTONS
         case WM_LBUTTONDOWN:
-            mx::invoke(targetID, mx::ContextEvent::BUTTONPRESS, MX_MBUTTON_LEFT, _wParam, 0);
+            mx::invoke(targetID, mx::CoreEventCode::Button, (u32)MX_MBUTTON_LEFT, _wParam, 0, true);
             return 0;
         case WM_MBUTTONDOWN:
-            mx::invoke(targetID, mx::ContextEvent::BUTTONPRESS, MX_MBUTTON_MIDDLE, _wParam, 0);
+            mx::invoke(targetID, mx::CoreEventCode::Button, (u32)MX_MBUTTON_MIDDLE, _wParam, 0, true);
             return 0;
         case WM_RBUTTONDOWN:
-            mx::invoke(targetID, mx::ContextEvent::BUTTONPRESS, MX_MBUTTON_RIGHT, _wParam, 0);
+            mx::invoke(targetID, mx::CoreEventCode::Button, (u32)MX_MBUTTON_RIGHT, _wParam, 0, true);
             return 0;
         case WM_LBUTTONUP:
-            mx::invoke(targetID, mx::ContextEvent::BUTTONRELEASE, MX_MBUTTON_LEFT, _wParam, 0);
+            mx::invoke(targetID, mx::CoreEventCode::Button, (u32)MX_MBUTTON_LEFT, _wParam, 0, false);
             return 0;
         case WM_MBUTTONUP:
-            mx::invoke(targetID, mx::ContextEvent::BUTTONRELEASE, MX_MBUTTON_MIDDLE, _wParam, 0);
+            mx::invoke(targetID, mx::CoreEventCode::Button, (u32)MX_MBUTTON_MIDDLE, _wParam, 0, false);
             return 0;
         case WM_RBUTTONUP:
-            mx::invoke(targetID, mx::ContextEvent::BUTTONRELEASE, MX_MBUTTON_RIGHT, _wParam, 0);
+            mx::invoke(targetID, mx::CoreEventCode::Button, (u32)MX_MBUTTON_RIGHT, _wParam, 0,false);
             return 0;
         case WM_XBUTTONDOWN: 
         {
             int button = HIWORD(_wParam);
-            if(button & 1) mx::invoke(targetID, mx::ContextEvent::BUTTONRELEASE, MX_MBUTTON_4, _wParam, 0);
-            if(button & 2 == 2) mx::invoke(targetID, mx::ContextEvent::BUTTONRELEASE, MX_MBUTTON_5, _wParam, 0);
+            if(button & 1) mx::invoke(targetID, mx::CoreEventCode::Button, MX_MBUTTON_4, _wParam, 0, true);
+            if(button & 2 == 2) mx::invoke(targetID, mx::CoreEventCode::Button, MX_MBUTTON_5, _wParam, 0, true);
             return 0;
         }
         case WM_XBUTTONUP:
         {
             int button = HIWORD(_wParam);
-            if(button & 1) mx::invoke(targetID, mx::ContextEvent::BUTTONRELEASE, MX_MBUTTON_4, _wParam, 0);
-            if(button & 2 == 2) mx::invoke(targetID, mx::ContextEvent::BUTTONRELEASE, MX_MBUTTON_5, _wParam, 0);
+            if(button & 1) mx::invoke(targetID, mx::CoreEventCode::Button, MX_MBUTTON_4, _wParam, 0, false);
+            if(button & 2 == 2) mx::invoke(targetID, mx::CoreEventCode::Button, MX_MBUTTON_5, _wParam, 0, false);
             return 0;
         }
 
@@ -441,7 +441,7 @@ LRESULT _stdcall WindowProc(HWND _hwnd, UINT _uMsg, WPARAM _wParam, LPARAM _lPar
             int key = vkToKeyCodes[_wParam];
             int scancode = HIWORD(_lParam) & (KF_EXTENDED | 0xff); // get extended key
             int mods = _lParam >> 24 & 1;
-            mx::invoke(targetID, mx::ContextEvent::KEYPRESS, key, scancode, mods);
+            mx::invoke(targetID, mx::CoreEventCode::Key, key, scancode, mods, true);
             return 0;
         }
         case WM_KEYUP:
@@ -449,7 +449,7 @@ LRESULT _stdcall WindowProc(HWND _hwnd, UINT _uMsg, WPARAM _wParam, LPARAM _lPar
             int key = vkToKeyCodes[_wParam];
             int scancode = HIWORD(_lParam) & (KF_EXTENDED | 0xff); // get extended key
             int mods = _lParam >> 24 & 1; // check if alt or ctrl is down
-            mx::invoke(targetID, mx::ContextEvent::KEYRELEASE, key, scancode, mods);
+            mx::invoke(targetID, mx::CoreEventCode::Key, key, scancode, mods, false);
             return 0;
         }
         
@@ -457,7 +457,7 @@ LRESULT _stdcall WindowProc(HWND _hwnd, UINT _uMsg, WPARAM _wParam, LPARAM _lPar
         case WM_CLOSE:
             PostQuitMessage(0);
         case WM_QUIT:
-            mx::invoke(targetID, mx::ContextEvent::CLOSE, 0, 0, 0);
+            mx::invoke(targetID, mx::CoreEventCode::Close, 0, 0, 0);
             return 0;
     }
     return DefWindowProcA(_hwnd, _uMsg, _wParam, _lParam);
@@ -466,11 +466,12 @@ LRESULT _stdcall WindowProc(HWND _hwnd, UINT _uMsg, WPARAM _wParam, LPARAM _lPar
 mx::Context::Context(const mx::ContextDesc& _desc)
 : desc(_desc)
 {
+    this->setupEvents();
+    
     // unpack
     u32 sizex = desc.sizex;
     u32 sizey = desc.sizey;
     mx::ContextFlags flags = desc.flags;
-
 
     HINSTANCE hInstance = GetModuleHandle(NULL);
 

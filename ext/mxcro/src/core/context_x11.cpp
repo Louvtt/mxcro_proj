@@ -203,6 +203,8 @@ constexpr static int translateXButtonCode(int button)
 mx::Context::Context(const mx::ContextDesc& _desc)
 : desc(_desc)
 {
+    this->setupEvents();
+
     // open x server
     handle.display = XOpenDisplay(NULL);
     if(handle.display == NULL) {
@@ -370,11 +372,11 @@ void mx::Context::pollEvents()
             // keyboard
             case KeyPress:
                 XLookupString(&e.xkey, text, 256, &key, NULL);
-                invokeEvent(mx::ContextEvent::KEYPRESS, translateXKeycode(key), key, 0L);
+                invokeEvent(mx::CoreEventCode::Key, translateXKeycode(key), key, 0L, true);
                 break;
             case KeyRelease:
                 XLookupString(&e.xkey, text, 256, &key, NULL);
-                invokeEvent(mx::ContextEvent::KEYRELEASE, translateXKeycode(key), key, 0L);
+                invokeEvent(mx::CoreEventCode::Key, translateXKeycode(key), key, 0L, false);
                 break;
             // keyboard mapping
             case MappingNotify:
@@ -384,17 +386,17 @@ void mx::Context::pollEvents()
             // mouse
             case ButtonPress:
                 if(e.xbutton.button == 4 || e.xbutton.button == 5) {
-                    invokeEvent(mx::ContextEvent::SCROLL, e.xbutton.button == 4 ? -X11_MOUSE_SENSIVITY : X11_MOUSE_SENSIVITY, 0L, 0L);
+                    invokeEvent(mx::CoreEventCode::Scroll, e.xbutton.button == 4 ? -X11_MOUSE_SENSIVITY : X11_MOUSE_SENSIVITY, 0L, 0L);
                     break;
                 }
-                invokeEvent(mx::ContextEvent::BUTTONPRESS, translateXButtonCode(e.xbutton.button), 0L, 0L);
+                invokeEvent(mx::CoreEventCode::Button, translateXButtonCode(e.xbutton.button), 0L, 0L, true);
                 break;
             case ButtonRelease:
                 if(e.xbutton.button == 4 || e.xbutton.button == 5) break;
-                invokeEvent(mx::ContextEvent::BUTTONRELEASE, translateXButtonCode(e.xbutton.button), 0L, 0L);
+                invokeEvent(mx::CoreEventCode::Button, translateXButtonCode(e.xbutton.button), 0L, 0L, false);
                 break;
             case MotionNotify: // mouse move
-                invokeEvent(mx::ContextEvent::MOUSEMOVE, e.xmotion.x, e.xmotion.y, 0L);
+                invokeEvent(mx::CoreEventCode::MouseMove, e.xmotion.x, e.xmotion.y, 0L);
                 break;
 
 
@@ -403,11 +405,11 @@ void mx::Context::pollEvents()
             case ResizeRequest: // resize
                 XWindowAttributes wattr;
                 XGetWindowAttributes(handle.display, handle.win, &wattr);
-                invokeEvent(mx::ContextEvent::RESIZE, wattr.width, wattr.height, 0L);
+                invokeEvent(mx::CoreEventCode::Resize, wattr.width, wattr.height, 0L);
                 break;
             case ClientMessage:
                 if(e.xclient.data.l[0] == handle.wmDeleteMessage) { // close
-                    invokeEvent(mx::ContextEvent::CLOSE, 0L, 0L, 0L);
+                    invokeEvent(mx::CoreEventCode::Close, 0L, 0L, 0L);
                     close = true;
                 }
                 break;

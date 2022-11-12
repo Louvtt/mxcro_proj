@@ -14,7 +14,7 @@ namespace mx {
 class EventBase
 {
 public:
-    virtual int getCode() const = 0;
+    virtual int getCode() const { return -1; };
 protected:
     virtual void internalDispatch(void* args) = 0;
     friend class EventManager;

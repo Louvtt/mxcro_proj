@@ -1,4 +1,5 @@
 #include "mx/gfx/contextRender3D.hpp"
+#include <glad/gl.h>
 
 #include "mx/gfx/shapeDrawData.hpp"
 #include "mx/gfx/shader.hpp"
@@ -8,7 +9,6 @@
 
 #include <iostream>
 
-#include <glad/gl.h>
 
 constexpr float DEFAULT_FOV = 45.F;
 

@@ -5,7 +5,7 @@
 #include <functional>
 #include <array>
 #include <vector>
-#include "types.hpp"
+#include "../core/types.hpp"
 #include "event.hpp"
 
 namespace mx
@@ -14,6 +14,13 @@ namespace mx
 class EventManager
 {
 public:
+    EventManager() {
+        m_registeredEvents = {};
+    }
+    ~EventManager() {
+        m_registeredEvents.clear();
+    }
+
     template <class EventType>
     void registerEvent() {
         m_registeredEvents.push_back(new EventType());
@@ -39,8 +46,23 @@ public:
         return nullptr;
     }
 
+    void dispatchEvent(int code, void* args) {
+        for(auto& event : m_registeredEvents) {
+            if(code == event->getCode()) {
+                event->internalDispatch(args);
+                break;
+            }
+        }
+    }
+
+    static EventManager* Get() {
+        if(!sInstance)
+            sInstance = new EventManager();
+        return sInstance;
+    }
 private:
     std::vector<EventBase*> m_registeredEvents{};
+    inline static EventManager* sInstance;
 };
 
 } // namespace mx

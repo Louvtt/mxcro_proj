@@ -5,6 +5,10 @@
 #include <unordered_map>
 #include <functional>
 #include <memory.h>
+
+#include "../io/eventManager.hpp"
+#include "coreEvents.hpp"
+
 #include "../gfx/contextRender.hpp"
 #include "../gfx/contextRender3D.hpp"
 #include "../core/types.hpp"
@@ -59,27 +63,7 @@ enum class ContextHint
     _LAST
 };
 
-namespace ContextEvent {
-    typedef int code;
-    constexpr code RESIZE        = 0;
-    constexpr code MOUSEMOVE     = 1;
-    constexpr code SCROLL        = 2;
-    constexpr code BUTTONPRESS   = 3;
-    constexpr code BUTTONRELEASE = 4;
-    constexpr code KEYPRESS      = 5;
-    constexpr code KEYRELEASE    = 6;
-    constexpr code CLOSE         = 7;
-    constexpr code LAST          = CLOSE;
-
-    typedef void (*RESIZEFN       )(u32 _sizex, u32 _sizey, void* _params);
-    typedef void (*MOUSEMOVEFN    )(u32 _x, u32 _y, void* _params);
-    typedef void (*SCROLLFN       )(i32 _delta, void* _params);
-    typedef void (*BUTTONPRESSFN  )(u32 _button, u32 _mods, void* _params);
-    typedef void (*BUTTONRELEASEFN)(u32 _button, u32 _mods, void* _params);
-    typedef void (*KEYPRESSFN     )(u32 _key, u32 _scancode, u32 _mods, void* _params);
-    typedef void (*KEYRELEASEFN   )(u32 _key, u32 _scancode, u32 _mods, void* _params);
-} // namespace Event
-void invoke(int _targetID, mx::ContextEvent::code _code, u32 _arg0, u32 _arg1, u32 _arg2);
+void invoke(int targetContextID, mx::CoreEventCode code, u32 arg0 = 0, u32 arg1 = 0, u32 arg2 = 0, u32 extra = 0);
 
 /**
  * @brief Context creation struct params
@@ -138,6 +122,13 @@ public:
      * @return false the window should stay open
      */
     bool shouldClose() const;
+
+    /**
+     * @brief Set if the window should be closed
+     * @param shouldClose true the window should close, false otherwise
+     */
+    void setShouldClose(bool shouldClose);
+
     /**
      * @brief Make the OpenGL context current
      */
@@ -153,14 +144,6 @@ public:
      * @brief Update the event list and handle the events
      */
     void pollEvents();
-
-    void registerOnResize(ContextEvent::RESIZEFN func, void* params);
-    void registerOnMouseMove(ContextEvent::MOUSEMOVEFN func, void* params);
-    void registerOnScroll(ContextEvent::SCROLLFN func, void* params);
-    void registerOnButtonPress(ContextEvent::BUTTONPRESSFN func, void* params);
-    void registerOnButtonRelease(ContextEvent::BUTTONRELEASEFN func, void* params);
-    void registerOnKeyPress(ContextEvent::KEYPRESSFN func, void* params);
-    void registerOnKeyRelease(ContextEvent::KEYRELEASEFN func, void* params);
 
     // data
 
@@ -217,20 +200,8 @@ private:
     std::unique_ptr<ContextRender3D> render3D = nullptr;
 
     friend void createGLContext(int targetID);
-    void setupBase(); 
-
-// EVENTS
-private:
-    // Represent a registered event
-    struct EventDescriptor
-    {
-        void* callback;
-        void* params;
-    };
-    std::unordered_map<ContextEvent::code, std::vector<EventDescriptor>> eventCallbacks{};
-    void invokeEvent(ContextEvent::code _code, u32 _arg0, u32 _arg1, u32 _arg2);
-    friend void invoke(int targetID, mx::ContextEvent::code code, u32 arg0, u32 arg1, u32 arg2);
-
+    void setupBase();
+    void setupEvents();
 };
 
 

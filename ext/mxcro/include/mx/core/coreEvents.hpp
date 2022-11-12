@@ -1,7 +1,7 @@
 #ifndef _MX_COREEVENTS_H_
 #define _MX_COREEVENTS_H_
 
-#include "event.hpp"
+#include "../io/event.hpp"
 #include "types.hpp"
 
 namespace mx {
@@ -31,9 +31,11 @@ struct ButtonEventArgs {
 };
 declareEvent(Button, CoreEventCode::Button);
 
+class Context;
 struct ResizeEventArgs {
     u32 sizeX;
     u32 sizeY;
+    Context* context;
 };
 declareEvent(Resize, CoreEventCode::Resize);
 
@@ -50,8 +52,11 @@ declareEvent(Scroll, CoreEventCode::Scroll);
 
 struct CloseEventArgs {
     u32 exitCode = 0;
+    Context* context;
 };
 declareEvent(Close, CoreEventCode::Close);
+
+void invokeEvent(mx::CoreEventCode code, u32 arg0, u32 arg1, u32 arg2, u32 arg3, void* extra);
 
 } // namespace mx
 
