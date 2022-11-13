@@ -84,6 +84,11 @@ static void glDebugCallback(GLenum _source, GLenum _type, GLuint _id, GLenum _se
     );
 }
 
+mx::ContextFlags mx::operator|(mx::ContextFlags a, mx::ContextFlags b) {
+    return (mx::ContextFlags)((int)a | (int)b);
+}
+
+
 unsigned int mx::Context::getSizeX() const { return desc.sizex; }
 unsigned int mx::Context::getSizeY() const { return desc.sizey; }
 
@@ -116,7 +121,6 @@ mx::ContextRender3D* mx::Context::get3DRenderer() const
 {
     return render3D.get();
 }
-
 void mx::Context::setupEvents()
 {
     mx::EventManager* eventManager = mx::EventManager::Get();

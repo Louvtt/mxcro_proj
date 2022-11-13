@@ -48,6 +48,7 @@ enum class ContextFlags
     AlwaysOnTop = 0x08,
     Support3D   = 0x10
 };
+ContextFlags operator|(ContextFlags a, ContextFlags b);
 
 /**
  * @brief Hints for loading OpenGL
