@@ -21,6 +21,7 @@ set(HEADER_FILES
     include/mx/maths/vec2.hpp
     include/mx/maths/vec3.hpp
     include/mx/maths/mat4.hpp
+    include/mx/maths/quaternion.hpp
 
     include/mx/io/keycodes.hpp
     include/mx/io/eventManager.hpp
@@ -46,6 +47,7 @@ set(SRC_FILES
     src/maths/vec2.cpp
     src/maths/vec3.cpp
     src/maths/mat4.cpp
+    src/maths/quaternion.cpp
 )
 
 find_package(X11 REQUIRED)
