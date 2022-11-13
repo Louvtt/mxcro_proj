@@ -112,11 +112,25 @@ mx::mat4 mx::mat4::lookAt(vec3 _pos, vec3 _target, vec3 _up)
 std::array<float, 16> mx::mat4::getData() const {
     return data;
 }
+float* mx::mat4::getDataPtr() const {
+    return (float*)(data.data());
+}
 void mx::mat4::setData(int i, int j, float value) {
     data[IX(i,j)] = value;
 }
 void mx::mat4::setData(std::array<float, 16> newData) {
     data = newData;
+}
+
+bool mx::mat4::operator==(const mx::mat4& other)
+{
+    auto otherData = other.getData();
+    for(int i = 0; i < 16; ++i) {
+        if(otherData[i] != data[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 std::ostream& mx::operator<<(std::ostream& o, const mat4& m) {

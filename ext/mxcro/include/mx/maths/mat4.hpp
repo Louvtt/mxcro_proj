@@ -66,6 +66,11 @@ public:
      */
     std::array<float, 16> getData() const;
     /**
+     * @brief Get the matrix data ptr
+     * @return float* - the data ptr
+     */
+    float* getDataPtr() const;
+    /**
      * @brief Set a value in the matrix
      * @param i column index
      * @param j row index
@@ -77,6 +82,10 @@ public:
      * @param newData new data of the matrix
      */
     void setData(std::array<float, 16> newData);
+
+    // Operators
+
+    bool operator==(const mat4& other);
 
 private:
     // column major

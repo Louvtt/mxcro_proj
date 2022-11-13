@@ -79,6 +79,12 @@ public:
      * @param value uniform value
      */
     void setMat4(const std::string& name, float* value);
+    /**
+     * @brief Set a mat4 uniform in the shader
+     * @param name uniform name
+     * @param value uniform value
+     */
+    void setMat4(const std::string& name, mat4 value);
     
     /**
      * @brief Bind shader program

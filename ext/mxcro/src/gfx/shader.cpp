@@ -174,6 +174,10 @@ void mx::Shader::setMat4(const std::string& name, float* value)
 {
     glProgramUniformMatrix4fv(ID, getUniformLocation(name), 1, GL_FALSE, value);
 }
+void mx::Shader::setMat4(const std::string& name, mat4 value)
+{
+    glProgramUniformMatrix4fv(ID, getUniformLocation(name), 1, GL_FALSE, value.getDataPtr());
+}
 
 void mx::Shader::bind()
 {
