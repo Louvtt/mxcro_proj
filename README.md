@@ -18,7 +18,7 @@ The build tool is [CMake](http://cmake.org).
 - Simple support for showing texture [Texture class](ext/mxcro/include/mx/gfx/texture.hpp)
 - Simple support for shaders and [UBO](ext/mxcro/include/mx/gfx/uniformBuffer.hpp) (vertex and fragment) see the [Shader class](ext/mxcro/include/mx/gfx/shader.hpp)
 - Simple support for custom Shapes [ShapeDrawData class](ext/mxcro/include/mx/gfx/shapeDrawData.hpp)
-- Events throught an EventManager class (see the [EventManager class](ext/mxcro/include/mx/io/eventManager.hpp.hpp))
+- Events throught an EventManager class (see the [EventManager class](ext/mxcro/include/mx/io/eventManager.hpp))
 - Base mathematics utility classes like [mx::vec2](ext/mxcro/include/mx/maths/vec2.hpp), [mx::vec3](ext/mxcro/include/mx/maths/vec3.hpp) and [mx::mat4](ext/mxcro/include/mx/maths/mat4.hpp) (Quaternion in WIP)
 
 ## WIP
