@@ -86,6 +86,7 @@ public:
     // Operators
 
     bool operator==(const mat4& other);
+    mx::mat4 operator*(const mat4& other);
 
 private:
     // column major

@@ -133,6 +133,14 @@ bool mx::mat4::operator==(const mx::mat4& other)
     return true;
 }
 
+mx::mat4 mx::mat4::operator*(const mx::mat4& other) {
+    mx::mat4 res;
+    for(int i = 0; i < 4; ++i)
+        for(int j = 0; j < 4; ++j)
+            res.data[IX(i,j)] = data[IX(i,j)] * other.data[IX(j,i)];
+    return res;
+}
+
 std::ostream& mx::operator<<(std::ostream& o, const mat4& m) {
     std::array<float, 16> data = m.getData();
     o << "mat4\n";
