@@ -71,7 +71,7 @@ struct CloseEventArgs {
 };
 declareEvent(Close, CoreEventCode::Close);
 
-void invokeEvent(mx::CoreEventCode code, u32 arg0, u32 arg1, u32 arg2, u32 arg3, void* extra);
+void invokeEvent(mx::CoreEventCode code, u32 arg0, u32 arg1=0L, u32 arg2=0L, u32 arg3=0L, void* extra=0);
 
 } // namespace mx
 
