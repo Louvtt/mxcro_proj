@@ -6,6 +6,15 @@
 namespace mx
 {
 
+enum class AttachementType : int
+{
+    ColorRGB,
+    ColorRGBA,
+    Depth24,
+    Depth32,
+    Stencil
+};
+
 class Texture;
 struct FrameBufferDesc
 {

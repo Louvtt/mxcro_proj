@@ -201,7 +201,7 @@ constexpr static int translateXButtonCode(int button)
 }
 
 mx::Context::Context(const mx::ContextDesc& _desc)
-: desc(_desc)
+: desc(_desc), handle(nullptr)
 {
     this->setupEvents();
 
@@ -215,7 +215,7 @@ mx::Context::Context(const mx::ContextDesc& _desc)
     handle.screen = DefaultScreen(handle.display);
 
     // get white and black pixel
-    u32 black, white;
+    u32 black = 0, white = 0;
     black = BlackPixel(handle.display, handle.screen);
     white = WhitePixel(handle.display, handle.screen);
 
@@ -260,8 +260,8 @@ mx::Context::Context(const mx::ContextDesc& _desc)
     }
     #else 
     GLint glxAttribs[] = {
-	    GLX_RGBA,
-	    GLX_DOUBLEBUFFER,
+	    GLX_RGBA,           True,
+	    GLX_DOUBLEBUFFER,   True,
 	    GLX_DEPTH_SIZE,     24,
 	    GLX_STENCIL_SIZE,   8,
 	    GLX_RED_SIZE,       8,
@@ -276,7 +276,7 @@ mx::Context::Context(const mx::ContextDesc& _desc)
     #endif
 
     // set window attributes
-    XSetWindowAttributes winAttribs;
+    XSetWindowAttributes winAttribs{};
     winAttribs.event_mask       = ExposureMask | KeyPressMask | KeyReleaseMask;
     winAttribs.background_pixel = black;
     winAttribs.border_pixel     = white;
@@ -306,7 +306,7 @@ mx::Context::Context(const mx::ContextDesc& _desc)
     );
 
     // test gl
-    GLint majorGLX, minorGLX = 0;
+    GLint majorGLX = 0, minorGLX = 0;
     glXQueryVersion(handle.display, &majorGLX, &minorGLX);
     LOG("GLX_VERSION:" << majorGLX << "." << minorGLX);
 

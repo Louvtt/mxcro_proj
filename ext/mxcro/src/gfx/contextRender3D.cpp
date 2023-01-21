@@ -36,10 +36,11 @@ void mx::ContextRender3D::resize(u32 _sx, u32 _sy)
     cameraUbo.setAttributesValues((void*)&cam);
 }
 
-void mx::ContextRender3D::draw()
+void mx::ContextRender3D::draw(mx::Shader* _shader)
 {
     for(auto instance : instances) {
-        instance->draw(&cameraUbo);
+        instance->setCameraUBO(&cameraUbo);
+        instance->draw(_shader);
     }
 }
 

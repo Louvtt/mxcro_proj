@@ -27,7 +27,7 @@ public:
     void addInstance(ShapeInstance* instance);
     
     void resize(u32 sx, u32 sy);
-    void draw();
+    void draw(Shader* shader);
 
     mx::Context* getContext() const;
 
